@@ -43,6 +43,10 @@ class PatientInfo:
     body_temperature: float
     spo2: int
     blood_sugar: float
+    hemoglobin: float = 12.0
+    urine_protein: str = "Negative"
+    platelet_count: int = 250
+    urine_glucose: str = "Negative"
     hypertension: bool = False
     diabetes: bool = False
     anemia: bool = False
@@ -86,6 +90,10 @@ class PatientInfo:
             "Body Temperature": f"{self.body_temperature:.1f} °C",
             "SpO₂": f"{self.spo2}%",
             "Blood Sugar": f"{self.blood_sugar:.1f} mg/dL",
+            "Hemoglobin": f"{self.hemoglobin:.1f} g/dL",
+            "Urine Protein": self.urine_protein,
+            "Platelet Count": f"{self.platelet_count} x10^9/L",
+            "Urine Glucose": self.urine_glucose,
             "Hypertension": "Yes" if self.hypertension else "No",
             "Diabetes": "Yes" if self.diabetes else "No",
             "Anemia": "Yes" if self.anemia else "No",

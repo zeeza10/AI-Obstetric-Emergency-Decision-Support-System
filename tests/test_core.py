@@ -46,6 +46,10 @@ VALID_FORM_DATA = {
     "body_temperature": "36.8",
     "spo2": "98",
     "blood_sugar": "95",
+    "hemoglobin": "12.0",
+    "urine_protein": "Negative",
+    "platelet_count": "250",
+    "urine_glucose": "Negative",
     "hypertension": "false",
     "diabetes": "false",
     "anemia": "false",
@@ -85,6 +89,10 @@ def make_patient(**overrides) -> PatientInfo:
         "body_temperature": 36.8,
         "spo2": 98,
         "blood_sugar": 95.0,
+        "hemoglobin": 12.0,
+        "urine_protein": "Negative",
+        "platelet_count": 250,
+        "urine_glucose": "Negative",
         "hypertension": False,
         "diabetes": False,
         "anemia": False,
@@ -109,6 +117,10 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(patient.bleeding_severity, "None")
         self.assertEqual(patient.pain_score, 0)
         self.assertFalse(patient.loss_of_consciousness)
+        self.assertEqual(patient.hemoglobin, 12.0)
+        self.assertEqual(patient.urine_protein, "Negative")
+        self.assertEqual(patient.platelet_count, 250)
+        self.assertEqual(patient.urine_glucose, "Negative")
         self.assertFalse(patient.hypertension)
         self.assertFalse(patient.previous_hemorrhage)
 
@@ -142,6 +154,10 @@ class ValidationTests(unittest.TestCase):
                 "body_temperature": 38.1,
                 "spo2": 93,
                 "blood_sugar": 145,
+                "hemoglobin": 9.6,
+                "urine_protein": "2+",
+                "platelet_count": 120,
+                "urine_glucose": "1+",
                 "hypertension": True,
                 "diabetes": True,
                 "anemia": False,
@@ -158,6 +174,8 @@ class ValidationTests(unittest.TestCase):
         self.assertTrue(patient.headache)
         self.assertEqual(patient.fetal_movement, "Reduced")
         self.assertTrue(patient.hypertension)
+        self.assertEqual(patient.urine_protein, "2+")
+        self.assertEqual(patient.platelet_count, 120)
         self.assertTrue(patient.diabetes)
         self.assertTrue(patient.multiple_pregnancy)
         self.assertTrue(patient.previous_preeclampsia)
@@ -351,6 +369,30 @@ class RiskEngineTests(unittest.TestCase):
         self.assertEqual(summary["Hypertension"], "Yes")
         self.assertEqual(summary["Previous Hemorrhage"], "Yes")
 
+    def test_lab_findings_increase_risk(self) -> None:
+        """Abnormal hemoglobin, platelets, and urine findings should affect classification."""
+        patient = make_patient(
+            hypertension=True,
+            diabetes=True,
+            hemoglobin=8.5,
+            urine_protein="3+",
+            platelet_count=85,
+            urine_glucose="2+",
+            systolic_bp=146,
+            diastolic_bp=94,
+        )
+
+        result = RuleBasedRiskEngine().assess_risk(patient)
+        summary = patient.to_summary_dict()
+
+        self.assertIn(result.risk_level, {"High Risk", "Critical Risk"})
+        self.assertGreaterEqual(result.risk_score, 9)
+        self.assertIn("Proteinuria with hypertension", result.clinical_explanation)
+        self.assertEqual(summary["Hemoglobin"], "8.5 g/dL")
+        self.assertEqual(summary["Urine Protein"], "3+")
+        self.assertEqual(summary["Platelet Count"], "85 x10^9/L")
+        self.assertEqual(summary["Urine Glucose"], "2+")
+
     def test_validation_rejects_invalid_patient(self) -> None:
         """Invalid data should be rejected by the validator."""
         patient = make_patient(age=0)
@@ -395,6 +437,10 @@ class RiskEngineTests(unittest.TestCase):
             body_temperature=38.1,
             spo2=93,
             blood_sugar=145.0,
+            hemoglobin=8.9,
+            urine_protein="3+",
+            platelet_count=90,
+            urine_glucose="2+",
             hypertension=True,
             diabetes=True,
             anemia=True,

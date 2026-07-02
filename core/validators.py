@@ -37,9 +37,15 @@ SPO2_MIN = 50
 SPO2_MAX = 100
 BLOOD_SUGAR_MIN = 30.0
 BLOOD_SUGAR_MAX = 600.0
+HEMOGLOBIN_MIN = 3.0
+HEMOGLOBIN_MAX = 20.0
+PLATELET_COUNT_MIN = 10
+PLATELET_COUNT_MAX = 1000
 
 ALLOWED_FETAL_MOVEMENTS: Set[str] = {"Normal", "Reduced", "Absent"}
 ALLOWED_BLEEDING_SEVERITIES: Set[str] = {"None", "Light", "Moderate", "Heavy", "Severe"}
+ALLOWED_URINE_PROTEIN: Set[str] = {"Negative", "Trace", "1+", "2+", "3+", "4+"}
+ALLOWED_URINE_GLUCOSE: Set[str] = {"Negative", "Trace", "1+", "2+", "3+", "4+"}
 
 PAIN_SCORE_MIN = 0
 PAIN_SCORE_MAX = 10
@@ -65,6 +71,10 @@ FIELD_LABELS = {
     "respiratory_rate": "Respiratory Rate",
     "spo2": "SpO₂",
     "blood_sugar": "Blood Sugar",
+    "hemoglobin": "Hemoglobin",
+    "urine_protein": "Urine Protein",
+    "platelet_count": "Platelet Count",
+    "urine_glucose": "Urine Glucose",
     "hypertension": "Hypertension",
     "diabetes": "Diabetes",
     "anemia": "Anemia",
@@ -445,6 +455,28 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         BLOOD_SUGAR_MIN,
         BLOOD_SUGAR_MAX,
     )
+    hemoglobin = _parse_required_float(
+        _require_raw_value(form_data, "hemoglobin"),
+        "hemoglobin",
+        HEMOGLOBIN_MIN,
+        HEMOGLOBIN_MAX,
+    )
+    urine_protein = _parse_required_choice(
+        _require_raw_value(form_data, "urine_protein"),
+        "urine_protein",
+        ALLOWED_URINE_PROTEIN,
+    )
+    platelet_count = _parse_required_int(
+        _require_raw_value(form_data, "platelet_count"),
+        "platelet_count",
+        PLATELET_COUNT_MIN,
+        PLATELET_COUNT_MAX,
+    )
+    urine_glucose = _parse_required_choice(
+        _require_raw_value(form_data, "urine_glucose"),
+        "urine_glucose",
+        ALLOWED_URINE_GLUCOSE,
+    )
     hypertension = _parse_required_yes_no(_require_raw_value(form_data, "hypertension"), "hypertension")
     diabetes = _parse_required_yes_no(_require_raw_value(form_data, "diabetes"), "diabetes")
     anemia = _parse_required_yes_no(_require_raw_value(form_data, "anemia"), "anemia")
@@ -489,6 +521,10 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         body_temperature=body_temperature,
         spo2=spo2,
         blood_sugar=blood_sugar,
+        hemoglobin=hemoglobin,
+        urine_protein=urine_protein,
+        platelet_count=platelet_count,
+        urine_glucose=urine_glucose,
         hypertension=hypertension,
         diabetes=diabetes,
         anemia=anemia,
@@ -539,6 +575,15 @@ def validate_patient_information(patient: PatientInfo) -> None:
     )
     _parse_required_int(patient.spo2, "spo2", SPO2_MIN, SPO2_MAX)
     _parse_required_float(patient.blood_sugar, "blood_sugar", BLOOD_SUGAR_MIN, BLOOD_SUGAR_MAX)
+    _parse_required_float(patient.hemoglobin, "hemoglobin", HEMOGLOBIN_MIN, HEMOGLOBIN_MAX)
+    _parse_required_choice(patient.urine_protein, "urine_protein", ALLOWED_URINE_PROTEIN)
+    _parse_required_int(
+        patient.platelet_count,
+        "platelet_count",
+        PLATELET_COUNT_MIN,
+        PLATELET_COUNT_MAX,
+    )
+    _parse_required_choice(patient.urine_glucose, "urine_glucose", ALLOWED_URINE_GLUCOSE)
 
     if not isinstance(patient.previous_c_section, bool):
         raise InvalidYesNoError("Previous C-Section must be Yes or No.", field="previous_c_section")

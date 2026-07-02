@@ -19,6 +19,7 @@ def _build_feature_vector(patient: PatientInfo) -> List[float]:
     """Build a numeric feature vector for explanation generation."""
     fetal_mapping = {"Normal": 0.0, "Reduced": 0.5, "Absent": 1.0}
     bleeding_mapping = {"None": 0.0, "Light": 0.25, "Moderate": 0.5, "Heavy": 0.75, "Severe": 1.0}
+    urine_mapping = {"Negative": 0.0, "Trace": 0.1, "1+": 0.25, "2+": 0.5, "3+": 0.75, "4+": 1.0}
     return [
         float(patient.age),
         float(patient.height_cm),
@@ -47,6 +48,10 @@ def _build_feature_vector(patient: PatientInfo) -> List[float]:
         float(patient.body_temperature),
         float(patient.spo2),
         patient.blood_sugar,
+        patient.hemoglobin,
+        urine_mapping.get(patient.urine_protein, 0.0),
+        float(patient.platelet_count),
+        urine_mapping.get(patient.urine_glucose, 0.0),
         1.0 if patient.hypertension else 0.0,
         1.0 if patient.diabetes else 0.0,
         1.0 if patient.anemia else 0.0,
@@ -86,6 +91,10 @@ def _build_feature_names() -> List[str]:
         "body_temperature",
         "spo2",
         "blood_sugar",
+        "hemoglobin",
+        "urine_protein",
+        "platelet_count",
+        "urine_glucose",
         "hypertension",
         "diabetes",
         "anemia",
@@ -113,6 +122,8 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
         "vomiting",
         "fetal_movement",
         "bleeding_severity",
+        "urine_protein",
+        "urine_glucose",
         "hypertension",
         "diabetes",
         "anemia",
@@ -129,6 +140,8 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
         "body_temperature",
         "bmi",
         "blood_sugar",
+        "hemoglobin",
+        "platelet_count",
     }
     shap_values: List[float] = []
     for index, value in enumerate(values):
@@ -136,7 +149,12 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
         if name in boolean_features or name == "pain_score":
             shap_values.append(round(float(value) * 0.35, 3))
         elif name in vital_features:
-            shap_values.append(round(float(value) / 100.0 * 0.2, 3))
+            if name == "hemoglobin":
+                shap_values.append(round(max(0.0, 11.0 - float(value)) / 11.0 * 0.35, 3))
+            elif name == "platelet_count":
+                shap_values.append(round(max(0.0, 150.0 - float(value)) / 150.0 * 0.35, 3))
+            else:
+                shap_values.append(round(float(value) / 100.0 * 0.2, 3))
         elif name == "spo2":
             shap_values.append(round((100.0 - float(value)) / 100.0 * 0.35, 3))
         else:

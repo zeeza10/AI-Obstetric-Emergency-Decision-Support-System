@@ -23,6 +23,7 @@ The system is designed as a clinical decision-support tool, not a replacement fo
 - Reusable prediction module for integration into applications or services
 - Transparent and explainable decision logic
 - Clinical history checklist covering hypertension, diabetes, anemia, heart disease, multiple pregnancy, previous preeclampsia, and previous hemorrhage
+- Lab findings for hemoglobin, urine protein, platelet count, and urine glucose
 
 See [CLINICAL_DECISION_RULES.md](CLINICAL_DECISION_RULES.md) for the current risk weights, classification levels, and combination rules.
 

@@ -81,6 +81,13 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 1
             reasons.append("Anemia may reduce physiologic reserve during pregnancy or bleeding.")
 
+        if patient.hemoglobin < 7.0:
+            score += 3
+            reasons.append("Severely low hemoglobin suggests critical anemia and reduced reserve.")
+        elif patient.hemoglobin < 11.0:
+            score += 1
+            reasons.append("Low hemoglobin is consistent with anemia and increases obstetric risk.")
+
         if patient.heart_disease:
             score += 2
             reasons.append("Heart disease increases the risk of maternal decompensation.")
@@ -170,6 +177,34 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 1
             reasons.append("Diabetes with abnormal blood sugar increases immediate clinical concern.")
 
+        if patient.urine_glucose in {"1+", "2+", "3+", "4+"}:
+            score += 1
+            reasons.append("Urine glucose is positive and may indicate poor glycemic control.")
+
+        if patient.diabetes and patient.urine_glucose in {"2+", "3+", "4+"}:
+            score += 1
+            reasons.append("Diabetes with significant urine glucose increases metabolic concern.")
+
+        if patient.platelet_count < 50:
+            score += 3
+            reasons.append("Very low platelet count suggests high bleeding and severe disease risk.")
+        elif patient.platelet_count < 100:
+            score += 2
+            reasons.append("Low platelet count requires urgent evaluation for severe obstetric disease.")
+        elif patient.platelet_count < 150:
+            score += 1
+            reasons.append("Mild thrombocytopenia increases clinical concern.")
+
+        if patient.urine_protein in {"3+", "4+"}:
+            score += 3
+            reasons.append("Marked urine protein is a major warning sign for preeclampsia.")
+        elif patient.urine_protein == "2+":
+            score += 2
+            reasons.append("Moderate urine protein increases concern for preeclampsia.")
+        elif patient.urine_protein == "1+":
+            score += 1
+            reasons.append("Positive urine protein requires clinical review.")
+
         if patient.fetal_movement == "Reduced":
             score += 2
             reasons.append("Fetal movement is reduced and needs urgent review.")
@@ -195,6 +230,13 @@ class RuleBasedRiskEngine(RiskEngine):
         if patient.previous_preeclampsia and (patient.headache or patient.blurred_vision or patient.hypertension):
             score += 1
             reasons.append("Preeclampsia history with current warning signs increases recurrence concern.")
+
+        if (
+            patient.urine_protein in {"2+", "3+", "4+"}
+            and (patient.hypertension or patient.systolic_bp >= 140 or patient.diastolic_bp >= 90)
+        ):
+            score += 2
+            reasons.append("Proteinuria with hypertension suggests possible preeclampsia.")
 
         if patient.difficulty_breathing:
             score += 2
@@ -223,6 +265,10 @@ class RuleBasedRiskEngine(RiskEngine):
         if patient.heart_disease and (patient.chest_pain or patient.difficulty_breathing or patient.spo2 < 95):
             score += 2
             reasons.append("Heart disease with cardiopulmonary symptoms may indicate acute decompensation.")
+
+        if patient.heavy_vaginal_bleeding and patient.hemoglobin < 11.0:
+            score += 1
+            reasons.append("Bleeding with low hemoglobin raises hemorrhage concern.")
 
         risk_level, explanation, action = self._classify(score, patient)
         return AssessmentResult(
@@ -295,6 +341,10 @@ class SimplePersistedModel:
             "body_temperature",
             "spo2",
             "blood_sugar",
+            "hemoglobin",
+            "urine_protein",
+            "platelet_count",
+            "urine_glucose",
             "hypertension",
             "diabetes",
             "anemia",
@@ -307,6 +357,7 @@ class SimplePersistedModel:
     def _encode_patient(self, patient: PatientInfo) -> list[float]:
         fetal_mapping = {"Normal": 0.0, "Reduced": 0.5, "Absent": 1.0}
         bleeding_mapping = {"None": 0.0, "Light": 0.25, "Moderate": 0.5, "Heavy": 0.75, "Severe": 1.0}
+        urine_mapping = {"Negative": 0.0, "Trace": 0.1, "1+": 0.25, "2+": 0.5, "3+": 0.75, "4+": 1.0}
         return [
             float(patient.age),
             float(patient.height_cm),
@@ -335,6 +386,10 @@ class SimplePersistedModel:
             float(patient.body_temperature),
             float(patient.spo2),
             patient.blood_sugar,
+            patient.hemoglobin,
+            urine_mapping.get(patient.urine_protein, 0.0),
+            float(patient.platelet_count),
+            urine_mapping.get(patient.urine_glucose, 0.0),
             1.0 if patient.hypertension else 0.0,
             1.0 if patient.diabetes else 0.0,
             1.0 if patient.anemia else 0.0,
@@ -377,13 +432,17 @@ class SimplePersistedModel:
         temp = vector[24]
         spo2 = vector[25]
         blood_sugar = vector[26]
-        hypertension = vector[27]
-        diabetes = vector[28]
-        anemia = vector[29]
-        heart_disease = vector[30]
-        multiple_pregnancy = vector[31]
-        previous_preeclampsia = vector[32]
-        previous_hemorrhage = vector[33]
+        hemoglobin = vector[27]
+        urine_protein = vector[28]
+        platelet_count = vector[29]
+        urine_glucose = vector[30]
+        hypertension = vector[31]
+        diabetes = vector[32]
+        anemia = vector[33]
+        heart_disease = vector[34]
+        multiple_pregnancy = vector[35]
+        previous_preeclampsia = vector[36]
+        previous_hemorrhage = vector[37]
 
         severity_score = 0.0
         severity_score += 0.02 * max(0.0, age - 25.0)
@@ -410,6 +469,10 @@ class SimplePersistedModel:
         severity_score += 0.12 * max(0.0, temp - 37.0)
         severity_score += 0.01 * max(0.0, 95.0 - spo2)
         severity_score += 0.004 * max(0.0, abs(blood_sugar - 100.0) - 20.0)
+        severity_score += 0.05 * max(0.0, 11.0 - hemoglobin)
+        severity_score += 0.2 * urine_protein
+        severity_score += 0.001 * max(0.0, 150.0 - platelet_count)
+        severity_score += 0.12 * urine_glucose
         severity_score += 0.16 * hypertension
         severity_score += 0.08 * diabetes
         severity_score += 0.08 * anemia
@@ -419,6 +482,8 @@ class SimplePersistedModel:
         severity_score += 0.16 * previous_hemorrhage
         severity_score += 0.08 * hypertension * (1.0 if systolic_bp >= 140.0 or diastolic_bp >= 90.0 else 0.0)
         severity_score += 0.08 * diabetes * (1.0 if blood_sugar < 70.0 or blood_sugar > 180.0 else 0.0)
+        severity_score += 0.08 * diabetes * (1.0 if urine_glucose >= 0.5 else 0.0)
+        severity_score += 0.12 * urine_protein * (hypertension + previous_preeclampsia)
         severity_score += 0.12 * previous_hemorrhage * heavy_bleeding
         severity_score += 0.12 * previous_preeclampsia * (headache + blurred_vision + hypertension)
         severity_score += 0.12 * heart_disease * (chest_pain + difficulty_breathing)
