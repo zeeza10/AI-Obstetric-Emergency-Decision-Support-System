@@ -1,115 +1,141 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Obstetric Emergency Assessment</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
-    <div class="page-shell">
-        <main class="content-wrap">
-            <div class="container py-5">
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="hero-card shadow-sm rounded-4 p-4 p-md-5">
-                            <div class="row align-items-center g-4">
-                                <div class="col-lg-7">
-                                    <span class="badge text-bg-primary-subtle text-primary-emphasis mb-3">Clinical Decision Support</span>
-                                    <h1 class="display-6 fw-bold text-primary">Obstetric Emergency Assessment</h1>
-                                    <p class="lead text-muted">A secure, modern interface for triaging obstetric emergencies using AI-assisted risk evaluation.</p>
-                                    <ul class="list-unstyled mt-4 text-muted">
-                                        <li>• Structured patient assessment</li>
-                                        <li>• Rapid risk scoring and confidence output</li>
-                                        <li>• Clear clinical guidance and next steps</li>
-                                    </ul>
+{% extends "base.html" %}
+
+{% block title %}Patient Assessment · {{ config['APP_NAME'] }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center g-4">
+        <div class="col-xl-10">
+            <div class="hero-panel">
+                <div class="hero-panel-body">
+                    <div class="row g-4 g-xl-5 align-items-start">
+                        <div class="col-lg-5">
+                            <span class="hero-eyebrow">
+                                <i class="bi bi-shield-check"></i>
+                                Obstetric Triage
+                            </span>
+                            <h1 class="hero-title">Obstetric Emergency Assessment</h1>
+                            <p class="hero-lead">
+                                Enter patient vitals and clinical signs to receive an AI-assisted risk classification with transparent explanations and recommended next steps.
+                            </p>
+                            <ul class="feature-list">
+                                <li>
+                                    <i class="bi bi-clipboard2-pulse"></i>
+                                    <span>Structured intake aligned with obstetric emergency workflows</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-speedometer2"></i>
+                                    <span>Rapid risk scoring with confidence indicators</span>
+                                </li>
+                                <li>
+                                    <i class="bi bi-chat-square-text"></i>
+                                    <span>Clear clinical guidance for immediate action</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-lg-7">
+                            <div class="surface-card">
+                                <div class="surface-card-header">
+                                    <h2 class="h5 fw-bold mb-1">Patient Assessment Form</h2>
+                                    <p class="text-muted-soft small mb-0">All fields are required for an accurate evaluation.</p>
                                 </div>
-                                <div class="col-lg-5">
-                                    <div class="card border-0 shadow-sm rounded-4">
-                                        <div class="card-body p-4">
-                                            <h2 class="h5 fw-bold mb-3">Patient Assessment</h2>
-                                            {% if error_message %}
-                                            <div class="alert alert-danger" role="alert">{{ error_message }}</div>
-                                            {% endif %}
-                                            <form method="post" action="{{ url_for('predict') }}">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" for="age">Age</label>
-                                                        <input class="form-control" id="age" name="age" type="number" min="12" max="55" required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" for="pregnancy_weeks">Pregnancy Weeks</label>
-                                                        <input class="form-control" id="pregnancy_weeks" name="pregnancy_weeks" type="number" min="1" max="45" required>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label">Heavy Bleeding</label>
-                                                        <div class="btn-group w-100" role="group">
-                                                            <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-yes" value="true">
-                                                            <label class="btn btn-outline-danger" for="bleeding-yes">Yes</label>
-                                                            <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-no" value="false" checked>
-                                                            <label class="btn btn-outline-secondary" for="bleeding-no">No</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label">Severe Abdominal Pain</label>
-                                                        <div class="btn-group w-100" role="group">
-                                                            <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-yes" value="true">
-                                                            <label class="btn btn-outline-danger" for="pain-yes">Yes</label>
-                                                            <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-no" value="false" checked>
-                                                            <label class="btn btn-outline-secondary" for="pain-no">No</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" for="blood_pressure">Blood Pressure</label>
-                                                        <input class="form-control" id="blood_pressure" name="blood_pressure" type="number" min="50" max="250" required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" for="body_temperature">Body Temperature (°C)</label>
-                                                        <input class="form-control" id="body_temperature" name="body_temperature" type="number" step="0.1" min="30" max="45" required>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" for="fetal_movement">Fetal Movement</label>
-                                                        <select class="form-select" id="fetal_movement" name="fetal_movement" required>
-                                                            <option value="Normal">Normal</option>
-                                                            <option value="Reduced">Reduced</option>
-                                                            <option value="Absent">Absent</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label" for="consciousness">Consciousness</label>
-                                                        <select class="form-select" id="consciousness" name="consciousness" required>
-                                                            <option value="Alert">Alert</option>
-                                                            <option value="Drowsy">Drowsy</option>
-                                                            <option value="Unconscious">Unconscious</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <button class="btn btn-primary w-100 py-2" type="submit">Assess Risk</button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
+                                <div class="surface-card-body">
+                                    {% if error_message %}
+                                    <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                                        <div>{{ error_message }}</div>
                                     </div>
+                                    {% endif %}
+
+                                    <form method="post" action="{{ url_for('predict') }}" novalidate>
+                                        <div class="section-label">
+                                            <i class="bi bi-person-vcard"></i>
+                                            Demographics
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="age">Age (years)</label>
+                                                <input class="form-control" id="age" name="age" type="number" min="12" max="55" placeholder="e.g. 28" required>
+                                                <div class="input-hint">Range: 12–55</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="pregnancy_weeks">Pregnancy Weeks</label>
+                                                <input class="form-control" id="pregnancy_weeks" name="pregnancy_weeks" type="number" min="1" max="45" placeholder="e.g. 32" required>
+                                                <div class="input-hint">Range: 1–45</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="section-label">
+                                            <i class="bi bi-activity"></i>
+                                            Clinical Signs
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Heavy Bleeding</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Heavy bleeding">
+                                                    <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="bleeding-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="bleeding-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Severe Abdominal Pain</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Severe abdominal pain">
+                                                    <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="pain-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="pain-no">No</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="section-label">
+                                            <i class="bi bi-heart-pulse"></i>
+                                            Vital Signs
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="blood_pressure">Blood Pressure (mmHg)</label>
+                                                <input class="form-control" id="blood_pressure" name="blood_pressure" type="number" min="50" max="250" placeholder="e.g. 120" required>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="body_temperature">Body Temperature (°C)</label>
+                                                <input class="form-control" id="body_temperature" name="body_temperature" type="number" step="0.1" min="30" max="45" placeholder="e.g. 36.8" required>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="fetal_movement">Fetal Movement</label>
+                                                <select class="form-select" id="fetal_movement" name="fetal_movement" required>
+                                                    <option value="Normal">Normal</option>
+                                                    <option value="Reduced">Reduced</option>
+                                                    <option value="Absent">Absent</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="consciousness">Consciousness</label>
+                                                <select class="form-select" id="consciousness" name="consciousness" required>
+                                                    <option value="Alert">Alert</option>
+                                                    <option value="Drowsy">Drowsy</option>
+                                                    <option value="Unconscious">Unconscious</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 pt-1">
+                                            <button class="btn btn-primary w-100" type="submit">
+                                                <i class="bi bi-clipboard2-check me-2"></i>
+                                                Assess Risk
+                                            </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
-        <footer class="footer-bar">
-            <div class="container py-4">
-                <div class="row align-items-center justify-content-between g-2">
-                    <div class="col-md-6">
-                        <div class="fw-semibold">Powered by {{ config['COMPANY_NAME'] }}</div>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <div class="small footer-meta">{{ config['FOOTER_TEXT'] }}</div>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
