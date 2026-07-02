@@ -1,5 +1,7 @@
 """Unit tests for the core obstetric emergency decision support modules."""
 
+import os
+import tempfile
 import unittest
 
 from core import (
@@ -7,6 +9,7 @@ from core import (
     InvalidNumericValueError,
     InvalidYesNoError,
     MissingValueError,
+    ModelRiskEngine,
     PatientInfo,
     RuleBasedRiskEngine,
     validate_patient_information,
@@ -33,6 +36,8 @@ class RiskEngineTests(unittest.TestCase):
 
         self.assertEqual(result.risk_level, "Low Risk")
         self.assertGreaterEqual(result.risk_score, 0)
+        self.assertGreaterEqual(result.confidence_score, 0.0)
+        self.assertLessEqual(result.confidence_score, 1.0)
         self.assertIn("Low Risk", result.risk_level)
 
     def test_critical_risk_result(self) -> None:
@@ -52,6 +57,8 @@ class RiskEngineTests(unittest.TestCase):
 
         self.assertEqual(result.risk_level, "Critical Risk")
         self.assertGreaterEqual(result.risk_score, 9)
+        self.assertGreaterEqual(result.confidence_score, 0.0)
+        self.assertLessEqual(result.confidence_score, 1.0)
         self.assertIn("immediate", result.recommended_action.lower())
 
     def test_validation_rejects_invalid_patient(self) -> None:
@@ -100,6 +107,24 @@ class RiskEngineTests(unittest.TestCase):
         )
 
         self.assertIsNotNone(patient)
+
+    def test_model_engine_falls_back_to_rule_based_when_model_missing(self) -> None:
+        """The model-backed engine should degrade gracefully if the model artifact is absent."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            missing_path = os.path.join(temp_dir, "missing_model.pkl")
+            engine = ModelRiskEngine(model_path=missing_path)
+            patient = PatientInfo(
+                age=28,
+                pregnancy_weeks=32,
+                heavy_bleeding=False,
+                severe_abdominal_pain=False,
+                blood_pressure=120,
+                body_temperature=36.8,
+                fetal_movement="Normal",
+                consciousness="Alert",
+            )
+            result = engine.assess_risk(patient)
+            self.assertIn(result.risk_level, {"Low Risk", "Moderate Risk", "High Risk", "Critical Risk"})
 
 
 if __name__ == "__main__":

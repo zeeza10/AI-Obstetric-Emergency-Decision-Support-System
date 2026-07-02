@@ -17,6 +17,7 @@ from core import (
     InvalidYesNoError,
     MissingValueError,
     PatientInfo,
+    ModelRiskEngine,
     RiskEngine,
     RuleBasedRiskEngine,
     build_recommendation_summary,
@@ -157,6 +158,7 @@ def display_results(result: AssessmentResult) -> None:
     print("-" * 45)
     print(f"Risk Level: {result.risk_level}")
     print(f"Risk Score: {result.risk_score}")
+    print(f"Confidence Score: {result.confidence_score}")
     print(f"Clinical Explanation: {result.clinical_explanation}")
     print(f"Recommended Immediate Action: {result.recommended_action}")
 
@@ -165,7 +167,7 @@ def main() -> None:
     """Run the console-based assessment workflow."""
     try:
         patient = collect_patient_information()
-        engine = RuleBasedRiskEngine()
+        engine = ModelRiskEngine()
         result = assess_risk(patient, engine)
         display_results(result)
     except Exception as exc:

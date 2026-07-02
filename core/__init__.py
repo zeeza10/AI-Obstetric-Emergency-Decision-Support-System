@@ -1,7 +1,7 @@
 """Core package for the obstetric emergency decision support system."""
 
 from .patient import PatientInfo
-from .risk_engine import AssessmentResult, RiskEngine, RuleBasedRiskEngine
+from .risk_engine import AssessmentResult, ModelRiskEngine, RiskEngine, RuleBasedRiskEngine
 from .recommendation import build_recommendation_summary
 from .logger import setup_logger
 from .validators import (
@@ -16,6 +16,7 @@ from .validators import (
 __all__ = [
     "PatientInfo",
     "AssessmentResult",
+    "ModelRiskEngine",
     "RiskEngine",
     "RuleBasedRiskEngine",
     "build_recommendation_summary",

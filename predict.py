@@ -10,7 +10,23 @@ from __future__ import annotations
 
 from typing import Optional
 
-from core import AssessmentResult, PatientInfo, RiskEngine, RuleBasedRiskEngine, validate_patient_information
+from core import (
+    AssessmentResult,
+    ModelRiskEngine,
+    PatientInfo,
+    RiskEngine,
+    RuleBasedRiskEngine,
+    validate_patient_information,
+)
+
+__all__ = ["PatientInfo", "AssessmentResult", "RiskEngine", "RuleBasedRiskEngine", "ModelRiskEngine", "predict_risk"]
+
+
+def predict_from_patient(patient: PatientInfo, engine: Optional[RiskEngine] = None) -> AssessmentResult:
+    """Assess risk for a preconstructed patient object."""
+    validate_patient_information(patient)
+    active_engine = engine or ModelRiskEngine()
+    return active_engine.assess_risk(patient)
 
 
 def predict_risk(
@@ -62,6 +78,4 @@ def predict_risk(
         fetal_movement=fetal_movement,
         consciousness=consciousness,
     )
-    validate_patient_information(patient)
-    active_engine = engine or RuleBasedRiskEngine()
-    return active_engine.assess_risk(patient)
+    return predict_from_patient(patient, engine=engine)
