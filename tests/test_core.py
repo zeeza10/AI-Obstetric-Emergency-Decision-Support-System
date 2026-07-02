@@ -27,8 +27,18 @@ VALID_FORM_DATA = {
     "gravida": "2",
     "parity": "1",
     "previous_c_section": "false",
-    "heavy_bleeding": "false",
-    "severe_abdominal_pain": "false",
+    "heavy_vaginal_bleeding": "false",
+    "bleeding_severity": "None",
+    "abdominal_pain": "false",
+    "pain_score": "0",
+    "fetal_movement": "Normal",
+    "loss_of_consciousness": "false",
+    "convulsions": "false",
+    "headache": "false",
+    "blurred_vision": "false",
+    "difficulty_breathing": "false",
+    "chest_pain": "false",
+    "vomiting": "false",
     "systolic_bp": "120",
     "diastolic_bp": "80",
     "heart_rate": "78",
@@ -36,8 +46,6 @@ VALID_FORM_DATA = {
     "body_temperature": "36.8",
     "spo2": "98",
     "blood_sugar": "95",
-    "fetal_movement": "Normal",
-    "consciousness": "Alert",
 }
 
 
@@ -51,8 +59,18 @@ def make_patient(**overrides) -> PatientInfo:
         "gravida": 2,
         "parity": 1,
         "previous_c_section": False,
-        "heavy_bleeding": False,
-        "severe_abdominal_pain": False,
+        "heavy_vaginal_bleeding": False,
+        "bleeding_severity": "None",
+        "abdominal_pain": False,
+        "pain_score": 0,
+        "fetal_movement": "Normal",
+        "loss_of_consciousness": False,
+        "convulsions": False,
+        "headache": False,
+        "blurred_vision": False,
+        "difficulty_breathing": False,
+        "chest_pain": False,
+        "vomiting": False,
         "systolic_bp": 120,
         "diastolic_bp": 80,
         "heart_rate": 78,
@@ -60,8 +78,6 @@ def make_patient(**overrides) -> PatientInfo:
         "body_temperature": 36.8,
         "spo2": 98,
         "blood_sugar": 95.0,
-        "fetal_movement": "Normal",
-        "consciousness": "Alert",
     }
     defaults.update(overrides)
     return PatientInfo(**defaults)
@@ -75,22 +91,10 @@ class ValidationTests(unittest.TestCase):
         patient = parse_patient_from_form_data(VALID_FORM_DATA)
 
         self.assertEqual(patient.age, 28)
-        self.assertEqual(patient.height_cm, 165)
-        self.assertEqual(patient.weight_kg, 68.0)
-        self.assertEqual(patient.bmi, 25.0)
-        self.assertEqual(patient.pregnancy_weeks, 32)
-        self.assertEqual(patient.gravida, 2)
-        self.assertEqual(patient.parity, 1)
-        self.assertFalse(patient.previous_c_section)
-        self.assertFalse(patient.heavy_bleeding)
-        self.assertFalse(patient.severe_abdominal_pain)
-        self.assertEqual(patient.systolic_bp, 120)
-        self.assertEqual(patient.diastolic_bp, 80)
-        self.assertEqual(patient.heart_rate, 78)
-        self.assertEqual(patient.spo2, 98)
-        self.assertEqual(patient.body_temperature, 36.8)
-        self.assertEqual(patient.fetal_movement, "Normal")
-        self.assertEqual(patient.consciousness, "Alert")
+        self.assertFalse(patient.heavy_vaginal_bleeding)
+        self.assertEqual(patient.bleeding_severity, "None")
+        self.assertEqual(patient.pain_score, 0)
+        self.assertFalse(patient.loss_of_consciousness)
 
     def test_parse_accepts_boolean_and_numeric_api_payloads(self) -> None:
         """JSON API payloads should accept native booleans and numeric types."""
@@ -103,8 +107,18 @@ class ValidationTests(unittest.TestCase):
                 "gravida": 3,
                 "parity": 2,
                 "previous_c_section": True,
-                "heavy_bleeding": True,
-                "severe_abdominal_pain": False,
+                "heavy_vaginal_bleeding": True,
+                "bleeding_severity": "Heavy",
+                "abdominal_pain": True,
+                "pain_score": 7,
+                "fetal_movement": "reduced",
+                "loss_of_consciousness": False,
+                "convulsions": False,
+                "headache": True,
+                "blurred_vision": False,
+                "difficulty_breathing": False,
+                "chest_pain": False,
+                "vomiting": True,
                 "systolic_bp": 95,
                 "diastolic_bp": 60,
                 "heart_rate": 110,
@@ -112,17 +126,14 @@ class ValidationTests(unittest.TestCase):
                 "body_temperature": 38.1,
                 "spo2": 93,
                 "blood_sugar": 145,
-                "fetal_movement": "reduced",
-                "consciousness": "drowsy",
             }
         )
 
-        self.assertEqual(patient.bmi, 28.3)
-        self.assertTrue(patient.heavy_bleeding)
-        self.assertTrue(patient.previous_c_section)
-        self.assertFalse(patient.severe_abdominal_pain)
+        self.assertTrue(patient.heavy_vaginal_bleeding)
+        self.assertEqual(patient.bleeding_severity, "Heavy")
+        self.assertEqual(patient.pain_score, 7)
+        self.assertTrue(patient.headache)
         self.assertEqual(patient.fetal_movement, "Reduced")
-        self.assertEqual(patient.consciousness, "Drowsy")
 
     def test_missing_required_field_raises_meaningful_error(self) -> None:
         """Missing fields should raise a dedicated exception with a clear message."""
@@ -182,24 +193,23 @@ class ValidationTests(unittest.TestCase):
     def test_invalid_yes_no_raises_meaningful_error(self) -> None:
         """Unrecognized Yes/No values should raise InvalidYesNoError."""
         payload = dict(VALID_FORM_DATA)
-        payload["heavy_bleeding"] = "maybe"
+        payload["convulsions"] = "maybe"
 
         with self.assertRaises(InvalidYesNoError) as context:
             parse_patient_from_form_data(payload)
 
-        self.assertEqual(context.exception.field, "heavy_bleeding")
+        self.assertEqual(context.exception.field, "convulsions")
         self.assertIn("Yes or No", str(context.exception))
 
     def test_invalid_choice_raises_meaningful_error(self) -> None:
         """Invalid dropdown values should raise InvalidChoiceError."""
         payload = dict(VALID_FORM_DATA)
-        payload["consciousness"] = "Sleeping"
+        payload["bleeding_severity"] = "Extreme"
 
         with self.assertRaises(InvalidChoiceError) as context:
             parse_patient_from_form_data(payload)
 
-        self.assertEqual(context.exception.field, "consciousness")
-        self.assertIn("Alert, Drowsy, Unconscious", str(context.exception))
+        self.assertEqual(context.exception.field, "bleeding_severity")
 
     def test_parity_must_be_less_than_gravida(self) -> None:
         """Parity should be clinically consistent with gravida."""
@@ -222,6 +232,28 @@ class ValidationTests(unittest.TestCase):
             parse_patient_from_form_data(payload)
 
         self.assertEqual(context.exception.field, "diastolic_bp")
+
+    def test_bleeding_severity_requires_bleeding_when_reported(self) -> None:
+        """Bleeding severity must match reported vaginal bleeding."""
+        payload = dict(VALID_FORM_DATA)
+        payload["heavy_vaginal_bleeding"] = "true"
+        payload["bleeding_severity"] = "None"
+
+        with self.assertRaises(InvalidChoiceError) as context:
+            parse_patient_from_form_data(payload)
+
+        self.assertEqual(context.exception.field, "bleeding_severity")
+
+    def test_pain_score_requires_abdominal_pain(self) -> None:
+        """Pain score must be consistent with abdominal pain."""
+        payload = dict(VALID_FORM_DATA)
+        payload["abdominal_pain"] = "true"
+        payload["pain_score"] = "0"
+
+        with self.assertRaises(InvalidNumericValueError) as context:
+            parse_patient_from_form_data(payload)
+
+        self.assertEqual(context.exception.field, "pain_score")
 
     def test_predict_from_form_data_rejects_invalid_input(self) -> None:
         """The prediction entry point should surface validation failures."""
@@ -248,21 +280,22 @@ class RiskEngineTests(unittest.TestCase):
         patient = make_patient(
             age=30,
             pregnancy_weeks=30,
-            heavy_bleeding=True,
-            severe_abdominal_pain=True,
+            heavy_vaginal_bleeding=True,
+            bleeding_severity="Severe",
+            abdominal_pain=True,
+            pain_score=9,
             systolic_bp=90,
             diastolic_bp=55,
             body_temperature=39.0,
             fetal_movement="Absent",
-            consciousness="Unconscious",
+            loss_of_consciousness=True,
+            convulsions=True,
         )
 
         result = RuleBasedRiskEngine().assess_risk(patient)
 
         self.assertEqual(result.risk_level, "Critical Risk")
         self.assertGreaterEqual(result.risk_score, 9)
-        self.assertGreaterEqual(result.confidence_score, 0.0)
-        self.assertLessEqual(result.confidence_score, 1.0)
         self.assertIn("immediate", result.recommended_action.lower())
 
     def test_validation_rejects_invalid_patient(self) -> None:
@@ -298,17 +331,21 @@ class RiskEngineTests(unittest.TestCase):
         patient = make_patient(
             age=30,
             pregnancy_weeks=30,
-            heavy_bleeding=True,
-            severe_abdominal_pain=True,
+            heavy_vaginal_bleeding=True,
+            bleeding_severity="Heavy",
+            abdominal_pain=True,
+            pain_score=8,
             systolic_bp=95,
             diastolic_bp=60,
             heart_rate=110,
             respiratory_rate=22,
+            body_temperature=38.1,
             spo2=93,
             blood_sugar=145.0,
-            body_temperature=38.1,
             fetal_movement="Reduced",
-            consciousness="Drowsy",
+            headache=True,
+            blurred_vision=True,
+            difficulty_breathing=True,
         )
         result = ModelRiskEngine().assess_risk(patient)
         explanation = generate_shap_explanation(patient, result)

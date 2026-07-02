@@ -39,7 +39,10 @@ BLOOD_SUGAR_MIN = 30.0
 BLOOD_SUGAR_MAX = 600.0
 
 ALLOWED_FETAL_MOVEMENTS: Set[str] = {"Normal", "Reduced", "Absent"}
-ALLOWED_CONSCIOUSNESS_STATES: Set[str] = {"Alert", "Drowsy", "Unconscious"}
+ALLOWED_BLEEDING_SEVERITIES: Set[str] = {"None", "Light", "Moderate", "Heavy", "Severe"}
+
+PAIN_SCORE_MIN = 0
+PAIN_SCORE_MAX = 10
 
 YES_VALUES: Set[str] = {"true", "yes", "y", "1", "on"}
 NO_VALUES: Set[str] = {"false", "no", "n", "0", "off"}
@@ -48,6 +51,14 @@ FIELD_LABELS = {
     "height_cm": "Height (cm)",
     "weight_kg": "Weight (kg)",
     "previous_c_section": "Previous C-Section",
+    "heavy_vaginal_bleeding": "Heavy Vaginal Bleeding",
+    "bleeding_severity": "Bleeding Severity",
+    "abdominal_pain": "Abdominal Pain",
+    "pain_score": "Pain Score",
+    "loss_of_consciousness": "Loss of Consciousness",
+    "blurred_vision": "Blurred Vision",
+    "difficulty_breathing": "Difficulty Breathing",
+    "chest_pain": "Chest Pain",
     "systolic_bp": "Systolic BP",
     "diastolic_bp": "Diastolic BP",
     "heart_rate": "Heart Rate",
@@ -255,6 +266,34 @@ def _validate_obstetric_counts(gravida: int, parity: int) -> None:
         )
 
 
+def _validate_bleeding_fields(heavy_vaginal_bleeding: bool, bleeding_severity: str) -> None:
+    """Ensure bleeding severity is consistent with reported bleeding."""
+    if heavy_vaginal_bleeding and bleeding_severity == "None":
+        raise InvalidChoiceError(
+            "Bleeding Severity must be specified when Heavy Vaginal Bleeding is Yes.",
+            field="bleeding_severity",
+        )
+    if not heavy_vaginal_bleeding and bleeding_severity != "None":
+        raise InvalidChoiceError(
+            "Bleeding Severity must be None when Heavy Vaginal Bleeding is No.",
+            field="bleeding_severity",
+        )
+
+
+def _validate_pain_fields(abdominal_pain: bool, pain_score: int) -> None:
+    """Ensure pain score is consistent with reported abdominal pain."""
+    if abdominal_pain and pain_score < 1:
+        raise InvalidNumericValueError(
+            "Pain Score must be at least 1 when Abdominal Pain is Yes.",
+            field="pain_score",
+        )
+    if not abdominal_pain and pain_score != 0:
+        raise InvalidNumericValueError(
+            "Pain Score must be 0 when Abdominal Pain is No.",
+            field="pain_score",
+        )
+
+
 def _validate_blood_pressure(systolic_bp: int, diastolic_bp: int) -> None:
     """Ensure blood pressure values are clinically consistent."""
     if diastolic_bp >= systolic_bp:
@@ -302,13 +341,59 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         _require_raw_value(form_data, "previous_c_section"),
         "previous_c_section",
     )
-    heavy_bleeding = _parse_required_yes_no(
-        _require_raw_value(form_data, "heavy_bleeding"),
-        "heavy_bleeding",
+    heavy_vaginal_bleeding = _parse_required_yes_no(
+        _require_raw_value(form_data, "heavy_vaginal_bleeding"),
+        "heavy_vaginal_bleeding",
     )
-    severe_abdominal_pain = _parse_required_yes_no(
-        _require_raw_value(form_data, "severe_abdominal_pain"),
-        "severe_abdominal_pain",
+    bleeding_severity = _parse_required_choice(
+        _require_raw_value(form_data, "bleeding_severity"),
+        "bleeding_severity",
+        ALLOWED_BLEEDING_SEVERITIES,
+    )
+    _validate_bleeding_fields(heavy_vaginal_bleeding, bleeding_severity)
+    abdominal_pain = _parse_required_yes_no(
+        _require_raw_value(form_data, "abdominal_pain"),
+        "abdominal_pain",
+    )
+    pain_score = _parse_required_int(
+        _require_raw_value(form_data, "pain_score"),
+        "pain_score",
+        PAIN_SCORE_MIN,
+        PAIN_SCORE_MAX,
+    )
+    _validate_pain_fields(abdominal_pain, pain_score)
+    fetal_movement = _parse_required_choice(
+        _require_raw_value(form_data, "fetal_movement"),
+        "fetal_movement",
+        ALLOWED_FETAL_MOVEMENTS,
+    )
+    loss_of_consciousness = _parse_required_yes_no(
+        _require_raw_value(form_data, "loss_of_consciousness"),
+        "loss_of_consciousness",
+    )
+    convulsions = _parse_required_yes_no(
+        _require_raw_value(form_data, "convulsions"),
+        "convulsions",
+    )
+    headache = _parse_required_yes_no(
+        _require_raw_value(form_data, "headache"),
+        "headache",
+    )
+    blurred_vision = _parse_required_yes_no(
+        _require_raw_value(form_data, "blurred_vision"),
+        "blurred_vision",
+    )
+    difficulty_breathing = _parse_required_yes_no(
+        _require_raw_value(form_data, "difficulty_breathing"),
+        "difficulty_breathing",
+    )
+    chest_pain = _parse_required_yes_no(
+        _require_raw_value(form_data, "chest_pain"),
+        "chest_pain",
+    )
+    vomiting = _parse_required_yes_no(
+        _require_raw_value(form_data, "vomiting"),
+        "vomiting",
     )
     systolic_bp = _parse_required_int(
         _require_raw_value(form_data, "systolic_bp"),
@@ -353,16 +438,6 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         BLOOD_SUGAR_MIN,
         BLOOD_SUGAR_MAX,
     )
-    fetal_movement = _parse_required_choice(
-        _require_raw_value(form_data, "fetal_movement"),
-        "fetal_movement",
-        ALLOWED_FETAL_MOVEMENTS,
-    )
-    consciousness = _parse_required_choice(
-        _require_raw_value(form_data, "consciousness"),
-        "consciousness",
-        ALLOWED_CONSCIOUSNESS_STATES,
-    )
 
     patient = PatientInfo(
         age=age,
@@ -372,8 +447,18 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         gravida=gravida,
         parity=parity,
         previous_c_section=previous_c_section,
-        heavy_bleeding=heavy_bleeding,
-        severe_abdominal_pain=severe_abdominal_pain,
+        heavy_vaginal_bleeding=heavy_vaginal_bleeding,
+        bleeding_severity=bleeding_severity,
+        abdominal_pain=abdominal_pain,
+        pain_score=pain_score,
+        fetal_movement=fetal_movement,
+        loss_of_consciousness=loss_of_consciousness,
+        convulsions=convulsions,
+        headache=headache,
+        blurred_vision=blurred_vision,
+        difficulty_breathing=difficulty_breathing,
+        chest_pain=chest_pain,
+        vomiting=vomiting,
         systolic_bp=systolic_bp,
         diastolic_bp=diastolic_bp,
         heart_rate=heart_rate,
@@ -381,8 +466,6 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         body_temperature=body_temperature,
         spo2=spo2,
         blood_sugar=blood_sugar,
-        fetal_movement=fetal_movement,
-        consciousness=consciousness,
     )
     validate_patient_information(patient)
     return patient
@@ -429,13 +512,31 @@ def validate_patient_information(patient: PatientInfo) -> None:
 
     if not isinstance(patient.previous_c_section, bool):
         raise InvalidYesNoError("Previous C-Section must be Yes or No.", field="previous_c_section")
-    if not isinstance(patient.heavy_bleeding, bool):
-        raise InvalidYesNoError("Heavy Bleeding must be Yes or No.", field="heavy_bleeding")
-    if not isinstance(patient.severe_abdominal_pain, bool):
+    if not isinstance(patient.heavy_vaginal_bleeding, bool):
         raise InvalidYesNoError(
-            "Severe Abdominal Pain must be Yes or No.",
-            field="severe_abdominal_pain",
+            "Heavy Vaginal Bleeding must be Yes or No.",
+            field="heavy_vaginal_bleeding",
         )
-
+    _parse_required_choice(patient.bleeding_severity, "bleeding_severity", ALLOWED_BLEEDING_SEVERITIES)
+    _validate_bleeding_fields(patient.heavy_vaginal_bleeding, patient.bleeding_severity)
+    if not isinstance(patient.abdominal_pain, bool):
+        raise InvalidYesNoError("Abdominal Pain must be Yes or No.", field="abdominal_pain")
+    _parse_required_int(patient.pain_score, "pain_score", PAIN_SCORE_MIN, PAIN_SCORE_MAX)
+    _validate_pain_fields(patient.abdominal_pain, patient.pain_score)
     _parse_required_choice(patient.fetal_movement, "fetal_movement", ALLOWED_FETAL_MOVEMENTS)
-    _parse_required_choice(patient.consciousness, "consciousness", ALLOWED_CONSCIOUSNESS_STATES)
+
+    for field_name in (
+        "loss_of_consciousness",
+        "convulsions",
+        "headache",
+        "blurred_vision",
+        "difficulty_breathing",
+        "chest_pain",
+        "vomiting",
+    ):
+        value = getattr(patient, field_name)
+        if not isinstance(value, bool):
+            raise InvalidYesNoError(
+                f"{_normalize_label(field_name)} must be Yes or No.",
+                field=field_name,
+            )

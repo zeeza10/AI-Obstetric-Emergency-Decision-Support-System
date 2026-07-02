@@ -43,8 +43,18 @@ def create_patient(
     gravida: int,
     parity: int,
     previous_c_section: bool,
-    heavy_bleeding: bool,
-    severe_abdominal_pain: bool,
+    heavy_vaginal_bleeding: bool,
+    bleeding_severity: str,
+    abdominal_pain: bool,
+    pain_score: int,
+    fetal_movement: str,
+    loss_of_consciousness: bool,
+    convulsions: bool,
+    headache: bool,
+    blurred_vision: bool,
+    difficulty_breathing: bool,
+    chest_pain: bool,
+    vomiting: bool,
     systolic_bp: int,
     diastolic_bp: int,
     heart_rate: int,
@@ -52,8 +62,6 @@ def create_patient(
     body_temperature: float,
     spo2: int,
     blood_sugar: float,
-    fetal_movement: str,
-    consciousness: str,
 ) -> PatientInfo:
     """Create a PatientInfo instance from explicit clinical inputs."""
     return PatientInfo(
@@ -64,8 +72,18 @@ def create_patient(
         gravida=gravida,
         parity=parity,
         previous_c_section=previous_c_section,
-        heavy_bleeding=heavy_bleeding,
-        severe_abdominal_pain=severe_abdominal_pain,
+        heavy_vaginal_bleeding=heavy_vaginal_bleeding,
+        bleeding_severity=bleeding_severity,
+        abdominal_pain=abdominal_pain,
+        pain_score=pain_score,
+        fetal_movement=fetal_movement,
+        loss_of_consciousness=loss_of_consciousness,
+        convulsions=convulsions,
+        headache=headache,
+        blurred_vision=blurred_vision,
+        difficulty_breathing=difficulty_breathing,
+        chest_pain=chest_pain,
+        vomiting=vomiting,
         systolic_bp=systolic_bp,
         diastolic_bp=diastolic_bp,
         heart_rate=heart_rate,
@@ -73,8 +91,6 @@ def create_patient(
         body_temperature=body_temperature,
         spo2=spo2,
         blood_sugar=blood_sugar,
-        fetal_movement=fetal_movement,
-        consciousness=consciousness,
     )
 
 
@@ -113,8 +129,18 @@ def predict_risk(
     gravida: int,
     parity: int,
     previous_c_section: bool,
-    heavy_bleeding: bool,
-    severe_abdominal_pain: bool,
+    heavy_vaginal_bleeding: bool,
+    bleeding_severity: str,
+    abdominal_pain: bool,
+    pain_score: int,
+    fetal_movement: str,
+    loss_of_consciousness: bool,
+    convulsions: bool,
+    headache: bool,
+    blurred_vision: bool,
+    difficulty_breathing: bool,
+    chest_pain: bool,
+    vomiting: bool,
     systolic_bp: int,
     diastolic_bp: int,
     heart_rate: int,
@@ -122,58 +148,9 @@ def predict_risk(
     body_temperature: float,
     spo2: int,
     blood_sugar: float,
-    fetal_movement: str,
-    consciousness: str,
     engine: Optional[RiskEngine] = None,
 ) -> AssessmentResult:
-    """Assess obstetric emergency risk from explicit patient parameters.
-
-    Parameters
-    ----------
-    age: int
-        Patient age in years.
-    height_cm: int
-        Patient height in centimeters.
-    weight_kg: float
-        Patient weight in kilograms.
-    pregnancy_weeks: int
-        Gestational age in weeks.
-    gravida: int
-        Total number of pregnancies including the current one.
-    parity: int
-        Number of previous births at or beyond 20 weeks.
-    previous_c_section: bool
-        Whether the patient has had a previous cesarean section.
-    heavy_bleeding: bool
-        Whether the patient reports heavy bleeding.
-    severe_abdominal_pain: bool
-        Whether the patient reports severe abdominal pain.
-    systolic_bp: int
-        Systolic blood pressure in mmHg.
-    diastolic_bp: int
-        Diastolic blood pressure in mmHg.
-    heart_rate: int
-        Heart rate in beats per minute.
-    respiratory_rate: int
-        Respiratory rate in breaths per minute.
-    body_temperature: float
-        Body temperature in degrees Celsius.
-    spo2: int
-        Peripheral oxygen saturation percentage.
-    blood_sugar: float
-        Blood glucose in mg/dL.
-    fetal_movement: str
-        One of: Normal, Reduced, Absent.
-    consciousness: str
-        One of: Alert, Drowsy, Unconscious.
-    engine: Optional[RiskEngine]
-        Optional custom engine implementation. Defaults to the built-in rule-based engine.
-
-    Returns
-    -------
-    AssessmentResult
-        Structured risk assessment output.
-    """
+    """Assess obstetric emergency risk from explicit patient parameters."""
     patient = create_patient(
         age=age,
         height_cm=height_cm,
@@ -182,8 +159,18 @@ def predict_risk(
         gravida=gravida,
         parity=parity,
         previous_c_section=previous_c_section,
-        heavy_bleeding=heavy_bleeding,
-        severe_abdominal_pain=severe_abdominal_pain,
+        heavy_vaginal_bleeding=heavy_vaginal_bleeding,
+        bleeding_severity=bleeding_severity,
+        abdominal_pain=abdominal_pain,
+        pain_score=pain_score,
+        fetal_movement=fetal_movement,
+        loss_of_consciousness=loss_of_consciousness,
+        convulsions=convulsions,
+        headache=headache,
+        blurred_vision=blurred_vision,
+        difficulty_breathing=difficulty_breathing,
+        chest_pain=chest_pain,
+        vomiting=vomiting,
         systolic_bp=systolic_bp,
         diastolic_bp=diastolic_bp,
         heart_rate=heart_rate,
@@ -191,7 +178,5 @@ def predict_risk(
         body_temperature=body_temperature,
         spo2=spo2,
         blood_sugar=blood_sugar,
-        fetal_movement=fetal_movement,
-        consciousness=consciousness,
     )
     return predict_from_patient(patient, engine=engine)

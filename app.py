@@ -35,8 +35,8 @@ def _build_assessment_response(result, patient, explanation, source: str):
         result.confidence_score,
         patient.age,
         patient.pregnancy_weeks,
-        patient.heavy_bleeding,
-        patient.severe_abdominal_pain,
+        patient.heavy_vaginal_bleeding,
+        patient.abdominal_pain,
     )
     log_assessment_audit(audit_logger, patient, result, source=source)
     return {

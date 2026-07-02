@@ -102,26 +102,40 @@
 
                                         <div class="section-label">
                                             <i class="bi bi-activity"></i>
-                                            Clinical Signs
+                                            Clinical Signs & Symptoms
                                         </div>
                                         <div class="row g-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">Heavy Bleeding</label>
-                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Heavy bleeding">
-                                                    <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-yes" value="true" required>
+                                                <label class="form-label">Heavy Vaginal Bleeding</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Heavy vaginal bleeding">
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="bleeding" name="heavy_vaginal_bleeding" id="bleeding-yes" value="true" required>
                                                     <label class="btn btn-outline-danger" for="bleeding-yes">Yes</label>
-                                                    <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-no" value="false" checked>
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="bleeding" name="heavy_vaginal_bleeding" id="bleeding-no" value="false" checked>
                                                     <label class="btn btn-outline-hz btn-outline-hz-active" for="bleeding-no">No</label>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Severe Abdominal Pain</label>
-                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Severe abdominal pain">
-                                                    <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-yes" value="true" required>
+                                                <label class="form-label" for="bleeding_severity">Bleeding Severity</label>
+                                                <select class="form-select" id="bleeding_severity" name="bleeding_severity" required>
+                                                    <option value="None" selected>None</option>
+                                                    <option value="Light">Light</option>
+                                                    <option value="Moderate">Moderate</option>
+                                                    <option value="Heavy">Heavy</option>
+                                                    <option value="Severe">Severe</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Abdominal Pain</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Abdominal pain">
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="pain" name="abdominal_pain" id="pain-yes" value="true" required>
                                                     <label class="btn btn-outline-danger" for="pain-yes">Yes</label>
-                                                    <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-no" value="false" checked>
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="pain" name="abdominal_pain" id="pain-no" value="false" checked>
                                                     <label class="btn btn-outline-hz btn-outline-hz-active" for="pain-no">No</label>
                                                 </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="pain_score">Pain Score (0–10)</label>
+                                                <input class="form-control" id="pain_score" name="pain_score" type="number" min="0" max="10" value="0" required>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label" for="fetal_movement">Fetal Movement</label>
@@ -132,12 +146,67 @@
                                                 </select>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label" for="consciousness">Consciousness</label>
-                                                <select class="form-select" id="consciousness" name="consciousness" required>
-                                                    <option value="Alert">Alert</option>
-                                                    <option value="Drowsy">Drowsy</option>
-                                                    <option value="Unconscious">Unconscious</option>
-                                                </select>
+                                                <label class="form-label">Loss of Consciousness</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Loss of consciousness">
+                                                    <input type="radio" class="btn-check" name="loss_of_consciousness" id="loc-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="loc-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="loss_of_consciousness" id="loc-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="loc-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Convulsions</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Convulsions">
+                                                    <input type="radio" class="btn-check" name="convulsions" id="convulsions-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="convulsions-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="convulsions" id="convulsions-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="convulsions-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Headache</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Headache">
+                                                    <input type="radio" class="btn-check" name="headache" id="headache-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="headache-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="headache" id="headache-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="headache-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Blurred Vision</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Blurred vision">
+                                                    <input type="radio" class="btn-check" name="blurred_vision" id="vision-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="vision-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="blurred_vision" id="vision-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="vision-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Difficulty Breathing</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Difficulty breathing">
+                                                    <input type="radio" class="btn-check" name="difficulty_breathing" id="breathing-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="breathing-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="difficulty_breathing" id="breathing-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="breathing-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Chest Pain</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Chest pain">
+                                                    <input type="radio" class="btn-check" name="chest_pain" id="chest-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="chest-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="chest_pain" id="chest-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="chest-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Vomiting</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Vomiting">
+                                                    <input type="radio" class="btn-check" name="vomiting" id="vomiting-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="vomiting-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="vomiting" id="vomiting-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="vomiting-no">No</label>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -215,5 +284,26 @@
     document.querySelectorAll(".bmi-input").forEach((input) => {
         input.addEventListener("input", updateBmiDisplay);
     });
+
+    function updateSymptomFields() {
+        const bleedingYes = document.getElementById("bleeding-yes").checked;
+        const bleedingSeverity = document.getElementById("bleeding_severity");
+        if (!bleedingYes) {
+            bleedingSeverity.value = "None";
+        }
+
+        const painYes = document.getElementById("pain-yes").checked;
+        const painScore = document.getElementById("pain_score");
+        if (!painYes) {
+            painScore.value = "0";
+        } else if (parseInt(painScore.value, 10) < 1) {
+            painScore.value = "1";
+        }
+    }
+
+    document.querySelectorAll(".symptom-toggle").forEach((input) => {
+        input.addEventListener("change", updateSymptomFields);
+    });
+    updateSymptomFields();
 </script>
 {% endblock %}

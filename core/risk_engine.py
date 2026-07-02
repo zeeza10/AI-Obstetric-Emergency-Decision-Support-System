@@ -73,13 +73,33 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 1
             reasons.append("Gestational age is outside the expected low-risk range.")
 
-        if patient.heavy_bleeding:
+        if patient.heavy_vaginal_bleeding:
             score += 3
-            reasons.append("Heavy bleeding is a major warning sign.")
+            reasons.append("Heavy vaginal bleeding is a major warning sign.")
 
-        if patient.severe_abdominal_pain:
+        if patient.bleeding_severity == "Moderate":
+            score += 1
+            reasons.append("Moderate bleeding severity increases clinical concern.")
+        elif patient.bleeding_severity == "Heavy":
             score += 2
-            reasons.append("Severe abdominal pain suggests possible serious complications.")
+            reasons.append("Heavy bleeding severity is clinically significant.")
+        elif patient.bleeding_severity == "Severe":
+            score += 3
+            reasons.append("Severe bleeding severity suggests urgent hemorrhage risk.")
+
+        if patient.abdominal_pain:
+            score += 2
+            reasons.append("Abdominal pain suggests possible serious complications.")
+
+        if patient.pain_score >= 8:
+            score += 3
+            reasons.append("Severe pain score indicates a high level of distress.")
+        elif patient.pain_score >= 5:
+            score += 2
+            reasons.append("Moderate to severe pain score requires prompt assessment.")
+        elif patient.pain_score >= 1:
+            score += 1
+            reasons.append("Reported pain score contributes to the clinical concern.")
 
         if patient.systolic_bp < 90 or patient.systolic_bp > 140 or patient.diastolic_bp > 90:
             score += 2
@@ -121,16 +141,36 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 4
             reasons.append("Absent fetal movement is a serious fetal concern.")
 
-        if patient.consciousness == "Drowsy":
-            score += 2
-            reasons.append("The patient appears drowsy.")
-        elif patient.consciousness == "Unconscious":
+        if patient.loss_of_consciousness:
             score += 5
-            reasons.append("The patient is unconscious.")
+            reasons.append("Loss of consciousness is a critical neurological warning sign.")
+
+        if patient.convulsions:
+            score += 4
+            reasons.append("Convulsions suggest a severe obstetric or neurological emergency.")
+
+        if patient.headache and patient.blurred_vision:
+            score += 2
+            reasons.append("Headache with blurred vision may indicate severe pre-eclampsia.")
+        elif patient.headache or patient.blurred_vision:
+            score += 1
+            reasons.append("Neurological visual symptoms require clinical review.")
+
+        if patient.difficulty_breathing:
+            score += 2
+            reasons.append("Difficulty breathing may indicate respiratory compromise.")
+
+        if patient.chest_pain:
+            score += 2
+            reasons.append("Chest pain requires urgent cardiovascular assessment.")
+
+        if patient.vomiting:
+            score += 1
+            reasons.append("Persistent vomiting may indicate systemic illness or complication.")
 
         if (
-            patient.heavy_bleeding
-            and patient.severe_abdominal_pain
+            patient.heavy_vaginal_bleeding
+            and patient.abdominal_pain
             and patient.systolic_bp < 100
         ):
             score += 2
@@ -147,7 +187,7 @@ class RuleBasedRiskEngine(RiskEngine):
 
     def _classify(self, score: int, patient: PatientInfo) -> tuple[str, str, str]:
         """Translate the computed score into a final risk category."""
-        if score >= 9 or (patient.heavy_bleeding and patient.consciousness == "Unconscious"):
+        if score >= 9 or (patient.heavy_vaginal_bleeding and patient.loss_of_consciousness):
             return (
                 "Critical Risk",
                 "The presentation suggests a severe obstetric emergency requiring immediate intervention.",
@@ -188,8 +228,18 @@ class SimplePersistedModel:
             "gravida",
             "parity",
             "previous_c_section",
-            "heavy_bleeding",
-            "severe_abdominal_pain",
+            "heavy_vaginal_bleeding",
+            "bleeding_severity",
+            "abdominal_pain",
+            "pain_score",
+            "fetal_movement",
+            "loss_of_consciousness",
+            "convulsions",
+            "headache",
+            "blurred_vision",
+            "difficulty_breathing",
+            "chest_pain",
+            "vomiting",
             "systolic_bp",
             "diastolic_bp",
             "heart_rate",
@@ -197,13 +247,11 @@ class SimplePersistedModel:
             "body_temperature",
             "spo2",
             "blood_sugar",
-            "fetal_movement",
-            "consciousness",
         ]
 
     def _encode_patient(self, patient: PatientInfo) -> list[float]:
         fetal_mapping = {"Normal": 0.0, "Reduced": 0.5, "Absent": 1.0}
-        consciousness_mapping = {"Alert": 0.0, "Drowsy": 0.5, "Unconscious": 1.0}
+        bleeding_mapping = {"None": 0.0, "Light": 0.25, "Moderate": 0.5, "Heavy": 0.75, "Severe": 1.0}
         return [
             float(patient.age),
             float(patient.height_cm),
@@ -213,8 +261,18 @@ class SimplePersistedModel:
             float(patient.gravida),
             float(patient.parity),
             1.0 if patient.previous_c_section else 0.0,
-            1.0 if patient.heavy_bleeding else 0.0,
-            1.0 if patient.severe_abdominal_pain else 0.0,
+            1.0 if patient.heavy_vaginal_bleeding else 0.0,
+            bleeding_mapping.get(patient.bleeding_severity, 0.0),
+            1.0 if patient.abdominal_pain else 0.0,
+            float(patient.pain_score) / 10.0,
+            fetal_mapping.get(patient.fetal_movement, 0.0),
+            1.0 if patient.loss_of_consciousness else 0.0,
+            1.0 if patient.convulsions else 0.0,
+            1.0 if patient.headache else 0.0,
+            1.0 if patient.blurred_vision else 0.0,
+            1.0 if patient.difficulty_breathing else 0.0,
+            1.0 if patient.chest_pain else 0.0,
+            1.0 if patient.vomiting else 0.0,
             float(patient.systolic_bp),
             float(patient.diastolic_bp),
             float(patient.heart_rate),
@@ -222,8 +280,6 @@ class SimplePersistedModel:
             float(patient.body_temperature),
             float(patient.spo2),
             patient.blood_sugar,
-            fetal_mapping.get(patient.fetal_movement, 0.0),
-            consciousness_mapping.get(patient.consciousness, 0.0),
         ]
 
     def predict_proba(self, features: Sequence[float]) -> list[list[float]]:
@@ -240,17 +296,25 @@ class SimplePersistedModel:
         gravida = vector[5]
         parity = vector[6]
         previous_c_section = vector[7]
-        bleeding = vector[8]
-        pain = vector[9]
-        systolic_bp = vector[10]
-        diastolic_bp = vector[11]
-        heart_rate = vector[12]
-        respiratory_rate = vector[13]
-        temp = vector[14]
-        spo2 = vector[15]
-        blood_sugar = vector[16]
-        fetal = vector[17]
-        consciousness = vector[18]
+        heavy_bleeding = vector[8]
+        bleeding_severity = vector[9]
+        abdominal_pain = vector[10]
+        pain_score = vector[11]
+        fetal = vector[12]
+        loss_of_consciousness = vector[13]
+        convulsions = vector[14]
+        headache = vector[15]
+        blurred_vision = vector[16]
+        difficulty_breathing = vector[17]
+        chest_pain = vector[18]
+        vomiting = vector[19]
+        systolic_bp = vector[20]
+        diastolic_bp = vector[21]
+        heart_rate = vector[22]
+        respiratory_rate = vector[23]
+        temp = vector[24]
+        spo2 = vector[25]
+        blood_sugar = vector[26]
 
         severity_score = 0.0
         severity_score += 0.02 * max(0.0, age - 25.0)
@@ -258,8 +322,18 @@ class SimplePersistedModel:
         severity_score += 0.01 * max(0.0, weeks - 28.0)
         severity_score += 0.03 * max(0.0, gravida - 2.0)
         severity_score += 0.08 * previous_c_section
-        severity_score += 0.35 * bleeding
-        severity_score += 0.25 * pain
+        severity_score += 0.3 * heavy_bleeding
+        severity_score += 0.2 * bleeding_severity
+        severity_score += 0.2 * abdominal_pain
+        severity_score += 0.25 * pain_score
+        severity_score += 0.25 * fetal
+        severity_score += 0.2 * loss_of_consciousness
+        severity_score += 0.18 * convulsions
+        severity_score += 0.08 * headache
+        severity_score += 0.08 * blurred_vision
+        severity_score += 0.12 * difficulty_breathing
+        severity_score += 0.12 * chest_pain
+        severity_score += 0.06 * vomiting
         severity_score += 0.01 * max(0.0, 120.0 - systolic_bp)
         severity_score += 0.008 * max(0.0, diastolic_bp - 80.0)
         severity_score += 0.005 * max(0.0, abs(heart_rate - 80.0) - 10.0)
@@ -267,8 +341,6 @@ class SimplePersistedModel:
         severity_score += 0.12 * max(0.0, temp - 37.0)
         severity_score += 0.01 * max(0.0, 95.0 - spo2)
         severity_score += 0.004 * max(0.0, abs(blood_sugar - 100.0) - 20.0)
-        severity_score += 0.25 * fetal
-        severity_score += 0.2 * consciousness
 
         if severity_score >= 1.4:
             class_index = 3
