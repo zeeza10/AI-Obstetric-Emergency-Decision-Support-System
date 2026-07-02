@@ -20,6 +20,16 @@ class AssessmentResult:
     confidence_score: float
     clinical_explanation: str
     recommended_action: str
+    risk_percentage: float = 0.0
+    ai_confidence: float = 0.0
+    possible_diagnosis: str = ""
+    emergency_level: str = ""
+    clinical_recommendation: str = ""
+    who_triage_category: str = ""
+    immediate_action_required: bool = False
+    hospital_admission_required: bool = False
+    explainable_ai: str = ""
+    pdf_report: str = ""
 
 
 class PredictionError(Exception):
