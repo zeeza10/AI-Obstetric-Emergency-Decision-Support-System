@@ -2,11 +2,35 @@
 
 from __future__ import annotations
 
+from decimal import Decimal, InvalidOperation
+from typing import Mapping, Optional, Set, Union
+
 from .patient import PatientInfo
+
+FormValue = Union[str, int, float, bool, None]
+
+AGE_MIN = 12
+AGE_MAX = 55
+PREGNANCY_WEEKS_MIN = 1
+PREGNANCY_WEEKS_MAX = 45
+BLOOD_PRESSURE_MIN = 50
+BLOOD_PRESSURE_MAX = 250
+BODY_TEMPERATURE_MIN = 30.0
+BODY_TEMPERATURE_MAX = 45.0
+
+ALLOWED_FETAL_MOVEMENTS: Set[str] = {"Normal", "Reduced", "Absent"}
+ALLOWED_CONSCIOUSNESS_STATES: Set[str] = {"Alert", "Drowsy", "Unconscious"}
+
+YES_VALUES: Set[str] = {"true", "yes", "y", "1", "on"}
+NO_VALUES: Set[str] = {"false", "no", "n", "0", "off"}
 
 
 class ValidationError(Exception):
     """Base class for domain-specific validation errors."""
+
+    def __init__(self, message: str, field: Optional[str] = None) -> None:
+        self.field = field
+        super().__init__(message)
 
 
 class MissingValueError(ValidationError):
@@ -25,32 +49,252 @@ class InvalidChoiceError(ValidationError):
     """Raised when an input choice is invalid."""
 
 
+def _normalize_label(field_name: str) -> str:
+    """Convert a field key into a user-facing label."""
+    return field_name.replace("_", " ").title()
+
+
+def _is_missing(value: FormValue) -> bool:
+    """Return True when a submitted value should be treated as empty."""
+    if value is None:
+        return True
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, (int, float)):
+        return False
+    return str(value).strip() == ""
+
+
+def _require_raw_value(form_data: Mapping[str, object], field_name: str) -> FormValue:
+    """Return a submitted field value or raise when it is missing."""
+    if field_name not in form_data:
+        raise MissingValueError(f"{_normalize_label(field_name)} is required.", field=field_name)
+
+    value = form_data[field_name]
+    if _is_missing(value):
+        raise MissingValueError(f"{_normalize_label(field_name)} is required.", field=field_name)
+    return value
+
+
+def _parse_whole_number(raw: FormValue, field_name: str) -> int:
+    """Parse a required whole-number field from user input."""
+    if isinstance(raw, bool):
+        raise InvalidNumericValueError(
+            f"{_normalize_label(field_name)} must be a whole number.",
+            field=field_name,
+        )
+
+    if isinstance(raw, int):
+        return raw
+
+    if isinstance(raw, float):
+        if not raw.is_integer():
+            raise InvalidNumericValueError(
+                f"{_normalize_label(field_name)} must be a whole number.",
+                field=field_name,
+            )
+        return int(raw)
+
+    text = str(raw).strip()
+    try:
+        decimal_value = Decimal(text)
+    except InvalidOperation as exc:
+        raise InvalidNumericValueError(
+            f"{_normalize_label(field_name)} must be a valid whole number.",
+            field=field_name,
+        ) from exc
+
+    if decimal_value != decimal_value.to_integral_value():
+        raise InvalidNumericValueError(
+            f"{_normalize_label(field_name)} must be a whole number.",
+            field=field_name,
+        )
+
+    return int(decimal_value)
+
+
+def _parse_decimal_number(raw: FormValue, field_name: str) -> float:
+    """Parse a required decimal field from user input."""
+    if isinstance(raw, bool):
+        raise InvalidNumericValueError(
+            f"{_normalize_label(field_name)} must be a valid number.",
+            field=field_name,
+        )
+
+    if isinstance(raw, (int, float)):
+        return float(raw)
+
+    text = str(raw).strip()
+    try:
+        return float(Decimal(text))
+    except InvalidOperation as exc:
+        raise InvalidNumericValueError(
+            f"{_normalize_label(field_name)} must be a valid number.",
+            field=field_name,
+        ) from exc
+
+
+def _parse_required_int(
+    raw: FormValue,
+    field_name: str,
+    minimum: int,
+    maximum: int,
+) -> int:
+    """Parse and range-check a required integer field."""
+    value = _parse_whole_number(raw, field_name)
+    if value < minimum or value > maximum:
+        raise InvalidNumericValueError(
+            f"{_normalize_label(field_name)} must be between {minimum} and {maximum}.",
+            field=field_name,
+        )
+    return value
+
+
+def _parse_required_float(
+    raw: FormValue,
+    field_name: str,
+    minimum: float,
+    maximum: float,
+) -> float:
+    """Parse and range-check a required floating-point field."""
+    value = _parse_decimal_number(raw, field_name)
+    if value < minimum or value > maximum:
+        raise InvalidNumericValueError(
+            f"{_normalize_label(field_name)} must be between {minimum:g} and {maximum:g}.",
+            field=field_name,
+        )
+    return round(value, 1)
+
+
+def _parse_required_yes_no(raw: FormValue, field_name: str) -> bool:
+    """Parse a required Yes/No field from common web and API representations."""
+    if isinstance(raw, bool):
+        return raw
+
+    if isinstance(raw, int) and raw in {0, 1}:
+        return bool(raw)
+
+    if isinstance(raw, float) and raw in {0.0, 1.0}:
+        return bool(int(raw))
+
+    normalized = str(raw).strip().lower()
+    if normalized in YES_VALUES:
+        return True
+    if normalized in NO_VALUES:
+        return False
+
+    raise InvalidYesNoError(
+        f"{_normalize_label(field_name)} must be Yes or No.",
+        field=field_name,
+    )
+
+
+def _parse_required_choice(raw: FormValue, field_name: str, allowed_values: Set[str]) -> str:
+    """Parse a required choice field against an allow-list."""
+    if isinstance(raw, bool):
+        raise InvalidChoiceError(
+            f"{_normalize_label(field_name)} must be one of: {', '.join(sorted(allowed_values))}.",
+            field=field_name,
+        )
+
+    normalized = str(raw).strip()
+    if not normalized:
+        raise MissingValueError(f"{_normalize_label(field_name)} is required.", field=field_name)
+
+    for allowed_value in allowed_values:
+        if normalized.casefold() == allowed_value.casefold():
+            return allowed_value
+
+    allowed_text = ", ".join(sorted(allowed_values))
+    raise InvalidChoiceError(
+        f"{_normalize_label(field_name)} must be one of: {allowed_text}.",
+        field=field_name,
+    )
+
+
+def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo:
+    """Parse and validate patient information from a request-like mapping."""
+    age = _parse_required_int(_require_raw_value(form_data, "age"), "age", AGE_MIN, AGE_MAX)
+    pregnancy_weeks = _parse_required_int(
+        _require_raw_value(form_data, "pregnancy_weeks"),
+        "pregnancy_weeks",
+        PREGNANCY_WEEKS_MIN,
+        PREGNANCY_WEEKS_MAX,
+    )
+    heavy_bleeding = _parse_required_yes_no(
+        _require_raw_value(form_data, "heavy_bleeding"),
+        "heavy_bleeding",
+    )
+    severe_abdominal_pain = _parse_required_yes_no(
+        _require_raw_value(form_data, "severe_abdominal_pain"),
+        "severe_abdominal_pain",
+    )
+    blood_pressure = _parse_required_int(
+        _require_raw_value(form_data, "blood_pressure"),
+        "blood_pressure",
+        BLOOD_PRESSURE_MIN,
+        BLOOD_PRESSURE_MAX,
+    )
+    body_temperature = _parse_required_float(
+        _require_raw_value(form_data, "body_temperature"),
+        "body_temperature",
+        BODY_TEMPERATURE_MIN,
+        BODY_TEMPERATURE_MAX,
+    )
+    fetal_movement = _parse_required_choice(
+        _require_raw_value(form_data, "fetal_movement"),
+        "fetal_movement",
+        ALLOWED_FETAL_MOVEMENTS,
+    )
+    consciousness = _parse_required_choice(
+        _require_raw_value(form_data, "consciousness"),
+        "consciousness",
+        ALLOWED_CONSCIOUSNESS_STATES,
+    )
+
+    patient = PatientInfo(
+        age=age,
+        pregnancy_weeks=pregnancy_weeks,
+        heavy_bleeding=heavy_bleeding,
+        severe_abdominal_pain=severe_abdominal_pain,
+        blood_pressure=blood_pressure,
+        body_temperature=body_temperature,
+        fetal_movement=fetal_movement,
+        consciousness=consciousness,
+    )
+    validate_patient_information(patient)
+    return patient
+
+
 def validate_patient_information(patient: PatientInfo) -> None:
     """Validate that the patient fields are clinically reasonable."""
-    if not isinstance(patient.age, int) or isinstance(patient.age, bool):
-        raise InvalidNumericValueError("Age must be a whole number.")
-    if patient.age <= 0:
-        raise InvalidNumericValueError("Age must be greater than zero.")
+    _parse_required_int(patient.age, "age", AGE_MIN, AGE_MAX)
+    _parse_required_int(
+        patient.pregnancy_weeks,
+        "pregnancy_weeks",
+        PREGNANCY_WEEKS_MIN,
+        PREGNANCY_WEEKS_MAX,
+    )
+    _parse_required_int(
+        patient.blood_pressure,
+        "blood_pressure",
+        BLOOD_PRESSURE_MIN,
+        BLOOD_PRESSURE_MAX,
+    )
+    _parse_required_float(
+        patient.body_temperature,
+        "body_temperature",
+        BODY_TEMPERATURE_MIN,
+        BODY_TEMPERATURE_MAX,
+    )
 
-    if not isinstance(patient.pregnancy_weeks, int) or isinstance(patient.pregnancy_weeks, bool):
-        raise InvalidNumericValueError("Pregnancy weeks must be a whole number.")
-    if patient.pregnancy_weeks <= 0 or patient.pregnancy_weeks > 45:
-        raise InvalidNumericValueError("Pregnancy weeks must be between 1 and 45.")
+    if not isinstance(patient.heavy_bleeding, bool):
+        raise InvalidYesNoError("Heavy Bleeding must be Yes or No.", field="heavy_bleeding")
+    if not isinstance(patient.severe_abdominal_pain, bool):
+        raise InvalidYesNoError(
+            "Severe Abdominal Pain must be Yes or No.",
+            field="severe_abdominal_pain",
+        )
 
-    if not isinstance(patient.blood_pressure, int) or isinstance(patient.blood_pressure, bool):
-        raise InvalidNumericValueError("Blood pressure must be a whole number.")
-    if patient.blood_pressure <= 0:
-        raise InvalidNumericValueError("Blood pressure must be greater than zero.")
-
-    if not isinstance(patient.body_temperature, (int, float)):
-        raise InvalidNumericValueError("Body temperature must be a number.")
-    if patient.body_temperature <= 0:
-        raise InvalidNumericValueError("Body temperature must be greater than zero.")
-
-    allowed_fetal_movements = {"Normal", "Reduced", "Absent"}
-    if patient.fetal_movement not in allowed_fetal_movements:
-        raise InvalidChoiceError("Fetal movement must be Normal, Reduced, or Absent.")
-
-    allowed_consciousness_states = {"Alert", "Drowsy", "Unconscious"}
-    if patient.consciousness not in allowed_consciousness_states:
-        raise InvalidChoiceError("Consciousness must be Alert, Drowsy, or Unconscious.")
+    _parse_required_choice(patient.fetal_movement, "fetal_movement", ALLOWED_FETAL_MOVEMENTS)
+    _parse_required_choice(patient.consciousness, "consciousness", ALLOWED_CONSCIOUSNESS_STATES)

@@ -10,6 +10,7 @@ from .validators import (
     InvalidYesNoError,
     MissingValueError,
     ValidationError,
+    parse_patient_from_form_data,
     validate_patient_information,
 )
 
@@ -21,6 +22,7 @@ __all__ = [
     "RuleBasedRiskEngine",
     "build_recommendation_summary",
     "setup_logger",
+    "parse_patient_from_form_data",
     "validate_patient_information",
     "ValidationError",
     "MissingValueError",

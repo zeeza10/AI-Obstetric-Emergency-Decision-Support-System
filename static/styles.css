@@ -53,3 +53,31 @@ body {
         text-align: left !important;
     }
 }
+
+.print-only {
+    display: none;
+}
+
+@media print {
+    body {
+        background: #ffffff;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    .report-card {
+        box-shadow: none !important;
+        border: 1px solid #d1d5db !important;
+    }
+
+    .alert,
+    .card {
+        break-inside: avoid;
+    }
+}

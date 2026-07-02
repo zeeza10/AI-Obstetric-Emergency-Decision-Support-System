@@ -13,19 +13,41 @@
             <div class="container py-5">
                 <div class="row justify-content-center">
                     <div class="col-lg-8">
-                        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 report-card">
+                            <div class="d-flex justify-content-between align-items-center mb-4 no-print">
                                 <div>
                                     <span class="badge text-bg-primary-subtle text-primary-emphasis">Assessment Summary</span>
                                     <h1 class="h3 fw-bold mt-2 mb-0">Clinical Risk Result</h1>
                                 </div>
-                                <a class="btn btn-outline-primary" href="{{ url_for('index') }}">Start New Assessment</a>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="window.print()">Print Report</button>
+                                    <a class="btn btn-outline-primary" href="{{ url_for('index') }}">Start New Assessment</a>
+                                </div>
+                            </div>
+
+                            <div class="print-only mb-3">
+                                <div class="fw-bold">{{ config['APP_NAME'] }}</div>
+                                <div class="small text-muted">Clinical Assessment Report</div>
                             </div>
 
                             {% if result %}
                             <div class="alert alert-{{ 'success' if risk_class == 'low-risk' else 'warning' if risk_class == 'moderate-risk' else 'danger' }} rounded-3">
                                 <div class="fw-bold fs-5">{{ result.risk_level }}</div>
                                 <div class="small mt-1">Risk Score: {{ result.risk_score }} | Confidence: {{ result.confidence_score }}</div>
+                            </div>
+
+                            <div class="card border-0 bg-light rounded-3 mt-3">
+                                <div class="card-body">
+                                    <h2 class="h6 fw-bold">Patient Inputs</h2>
+                                    <div class="row g-2 mt-1">
+                                        {% for label, value in patient_summary.items() %}
+                                        <div class="col-md-6">
+                                            <div class="small text-muted">{{ label }}</div>
+                                            <div>{{ value }}</div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="row g-3 mt-2">
@@ -53,7 +75,7 @@
                                         <div class="card-body">
                                             <h2 class="h6 fw-bold">Feature Importance</h2>
                                             <p class="small text-muted">SHAP-style view of which clinical features contributed most.</p>
-                                            <img src="{{ url_for('static', filename='explanations/feature_importance.svg') }}" class="img-fluid rounded" alt="Feature importance chart">
+                                            <img src="{{ url_for('static', filename=explanation.feature_importance_url) }}?v={{ explanation.cache_bust }}" class="img-fluid rounded" alt="Feature importance chart">
                                         </div>
                                     </div>
                                 </div>
@@ -62,7 +84,7 @@
                                         <div class="card-body">
                                             <h2 class="h6 fw-bold">Waterfall Explanation</h2>
                                             <p class="small text-muted">A clinician-friendly breakdown of how the prediction was built.</p>
-                                            <img src="{{ url_for('static', filename='explanations/waterfall.svg') }}" class="img-fluid rounded" alt="Waterfall chart">
+                                            <img src="{{ url_for('static', filename=explanation.waterfall_url) }}?v={{ explanation.cache_bust }}" class="img-fluid rounded" alt="Waterfall chart">
                                         </div>
                                     </div>
                                 </div>
@@ -72,6 +94,10 @@
                                 <div class="fw-bold">Why this prediction was made</div>
                                 <div class="small mt-1">{{ explanation.explanation_text }}</div>
                             </div>
+
+                            <div class="small text-muted mt-4 print-only">
+                                This report is generated by a clinical decision-support prototype and does not replace professional medical judgment.
+                            </div>
                             {% else %}
                             <div class="alert alert-secondary">No assessment was produced. Please try again.</div>
                             {% endif %}
@@ -80,7 +106,7 @@
                 </div>
             </div>
         </main>
-        <footer class="footer-bar">
+        <footer class="footer-bar no-print">
             <div class="container py-4">
                 <div class="row align-items-center justify-content-between g-2">
                     <div class="col-md-6">

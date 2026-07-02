@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any, Dict, List
 from xml.sax.saxutils import escape
@@ -116,11 +117,15 @@ def generate_shap_explanation(patient: PatientInfo, result: AssessmentResult) ->
         f"These clinical factors increased the predicted risk for this patient, which led to a {result.risk_level.lower()} classification with {result.confidence_score:.2f} confidence."
     )
 
+    cache_bust = int(time.time())
     return {
         "feature_names": feature_names,
         "shap_values": shap_values,
         "feature_importance_path": str(feature_importance_path),
         "waterfall_path": str(waterfall_path),
+        "feature_importance_url": "explanations/feature_importance.svg",
+        "waterfall_url": "explanations/waterfall.svg",
+        "cache_bust": cache_bust,
         "explanation_text": explanation_text,
         "risk_level": result.risk_level,
     }

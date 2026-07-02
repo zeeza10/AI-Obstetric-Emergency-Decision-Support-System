@@ -16,6 +16,7 @@ from core import (
     PatientInfo,
     RiskEngine,
     RuleBasedRiskEngine,
+    parse_patient_from_form_data,
     validate_patient_information,
 )
 
@@ -26,7 +27,10 @@ __all__ = [
     "RuleBasedRiskEngine",
     "ModelRiskEngine",
     "create_patient",
+    "get_default_engine",
+    "parse_patient_from_form_data",
     "predict_from_form_data",
+    "predict_from_patient",
     "predict_risk",
 ]
 
@@ -54,10 +58,20 @@ def create_patient(
     )
 
 
+def get_default_engine() -> RiskEngine:
+    """Return the configured risk engine implementation."""
+    from config import get_config
+
+    config = get_config()
+    if config.engine_type.lower() == "rule":
+        return RuleBasedRiskEngine()
+    return ModelRiskEngine(model_path=config.model_path or None)
+
+
 def predict_from_patient(patient: PatientInfo, engine: Optional[RiskEngine] = None) -> AssessmentResult:
     """Assess risk for a preconstructed patient object."""
     validate_patient_information(patient)
-    active_engine = engine or ModelRiskEngine()
+    active_engine = engine or get_default_engine()
     return active_engine.assess_risk(patient)
 
 
@@ -66,25 +80,7 @@ def predict_from_form_data(
     engine: Optional[RiskEngine] = None,
 ) -> Tuple[AssessmentResult, PatientInfo]:
     """Assess risk from a request-like form mapping while keeping parsing centralized."""
-    age = int(str(form_data.get("age", "0")))
-    pregnancy_weeks = int(str(form_data.get("pregnancy_weeks", "0")))
-    heavy_bleeding = str(form_data.get("heavy_bleeding", "false")) == "true"
-    severe_abdominal_pain = str(form_data.get("severe_abdominal_pain", "false")) == "true"
-    blood_pressure = int(str(form_data.get("blood_pressure", "0")))
-    body_temperature = float(str(form_data.get("body_temperature", "0")))
-    fetal_movement = str(form_data.get("fetal_movement", "Normal"))
-    consciousness = str(form_data.get("consciousness", "Alert"))
-
-    patient = create_patient(
-        age=age,
-        pregnancy_weeks=pregnancy_weeks,
-        heavy_bleeding=heavy_bleeding,
-        severe_abdominal_pain=severe_abdominal_pain,
-        blood_pressure=blood_pressure,
-        body_temperature=body_temperature,
-        fetal_movement=fetal_movement,
-        consciousness=consciousness,
-    )
+    patient = parse_patient_from_form_data(form_data)
     result = predict_from_patient(patient, engine=engine)
     return result, patient
 
