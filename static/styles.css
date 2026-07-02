@@ -1,0 +1,27 @@
+body {
+    background: linear-gradient(135deg, #f2f7ff 0%, #eef6ff 100%);
+    color: #18324a;
+    min-height: 100vh;
+}
+
+.hero-card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.text-primary {
+    color: #1d4ed8 !important;
+}
+
+.card {
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}

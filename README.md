@@ -65,15 +65,22 @@ AI-Obstetric-Emergency-Decision-Support-System/
 ```bash
 git clone <repository-url>
 cd AI-Obstetric-Emergency-Decision-Support-System
-python -m venv .venv
-source .venv/bin/activate   # On Linux/macOS
-.venv\Scripts\activate      # On Windows
+py -m venv .venv
+.venv\Scripts\activate
+py -m pip install --upgrade pip
+py -m pip install -r requirements.txt
 ```
 
 ### Run the application
 
 ```bash
-python app.py
+run_app.bat
+```
+
+Or directly:
+
+```bash
+.venv\Scripts\python.exe -m flask --app app run --host 0.0.0.0 --port 5000
 ```
 
 ## Usage
