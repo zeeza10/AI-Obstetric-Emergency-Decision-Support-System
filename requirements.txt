@@ -1,0 +1,8 @@
+# Core Python dependencies for Version 1
+# No external packages are required for the current console-based rule engine.
+
+# Future versions may use these packages:
+# flask>=3.0.0
+# pandas>=2.2.0
+# scikit-learn>=1.4.0
+# matplotlib>=3.8.0
