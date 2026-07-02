@@ -29,8 +29,13 @@ VALID_FORM_DATA = {
     "previous_c_section": "false",
     "heavy_bleeding": "false",
     "severe_abdominal_pain": "false",
-    "blood_pressure": "120",
+    "systolic_bp": "120",
+    "diastolic_bp": "80",
+    "heart_rate": "78",
+    "respiratory_rate": "16",
     "body_temperature": "36.8",
+    "spo2": "98",
+    "blood_sugar": "95",
     "fetal_movement": "Normal",
     "consciousness": "Alert",
 }
@@ -48,8 +53,13 @@ def make_patient(**overrides) -> PatientInfo:
         "previous_c_section": False,
         "heavy_bleeding": False,
         "severe_abdominal_pain": False,
-        "blood_pressure": 120,
+        "systolic_bp": 120,
+        "diastolic_bp": 80,
+        "heart_rate": 78,
+        "respiratory_rate": 16,
         "body_temperature": 36.8,
+        "spo2": 98,
+        "blood_sugar": 95.0,
         "fetal_movement": "Normal",
         "consciousness": "Alert",
     }
@@ -74,7 +84,10 @@ class ValidationTests(unittest.TestCase):
         self.assertFalse(patient.previous_c_section)
         self.assertFalse(patient.heavy_bleeding)
         self.assertFalse(patient.severe_abdominal_pain)
-        self.assertEqual(patient.blood_pressure, 120)
+        self.assertEqual(patient.systolic_bp, 120)
+        self.assertEqual(patient.diastolic_bp, 80)
+        self.assertEqual(patient.heart_rate, 78)
+        self.assertEqual(patient.spo2, 98)
         self.assertEqual(patient.body_temperature, 36.8)
         self.assertEqual(patient.fetal_movement, "Normal")
         self.assertEqual(patient.consciousness, "Alert")
@@ -92,8 +105,13 @@ class ValidationTests(unittest.TestCase):
                 "previous_c_section": True,
                 "heavy_bleeding": True,
                 "severe_abdominal_pain": False,
-                "blood_pressure": 95,
+                "systolic_bp": 95,
+                "diastolic_bp": 60,
+                "heart_rate": 110,
+                "respiratory_rate": 22,
                 "body_temperature": 38.1,
+                "spo2": 93,
+                "blood_sugar": 145,
                 "fetal_movement": "reduced",
                 "consciousness": "drowsy",
             }
@@ -120,13 +138,13 @@ class ValidationTests(unittest.TestCase):
     def test_empty_string_raises_missing_value_error(self) -> None:
         """Blank submitted values should be treated as missing input."""
         payload = dict(VALID_FORM_DATA)
-        payload["blood_pressure"] = "   "
+        payload["systolic_bp"] = "   "
 
         with self.assertRaises(MissingValueError) as context:
             parse_patient_from_form_data(payload)
 
-        self.assertEqual(context.exception.field, "blood_pressure")
-        self.assertIn("Blood Pressure is required", str(context.exception))
+        self.assertEqual(context.exception.field, "systolic_bp")
+        self.assertIn("Systolic BP is required", str(context.exception))
 
     def test_invalid_number_raises_meaningful_error(self) -> None:
         """Non-numeric values should be rejected with a field-specific message."""
@@ -194,6 +212,17 @@ class ValidationTests(unittest.TestCase):
 
         self.assertEqual(context.exception.field, "parity")
 
+    def test_diastolic_bp_must_be_lower_than_systolic(self) -> None:
+        """Diastolic BP must be clinically lower than systolic BP."""
+        payload = dict(VALID_FORM_DATA)
+        payload["systolic_bp"] = "120"
+        payload["diastolic_bp"] = "125"
+
+        with self.assertRaises(InvalidNumericValueError) as context:
+            parse_patient_from_form_data(payload)
+
+        self.assertEqual(context.exception.field, "diastolic_bp")
+
     def test_predict_from_form_data_rejects_invalid_input(self) -> None:
         """The prediction entry point should surface validation failures."""
         with self.assertRaises(InvalidNumericValueError):
@@ -221,7 +250,8 @@ class RiskEngineTests(unittest.TestCase):
             pregnancy_weeks=30,
             heavy_bleeding=True,
             severe_abdominal_pain=True,
-            blood_pressure=90,
+            systolic_bp=90,
+            diastolic_bp=55,
             body_temperature=39.0,
             fetal_movement="Absent",
             consciousness="Unconscious",
@@ -270,7 +300,12 @@ class RiskEngineTests(unittest.TestCase):
             pregnancy_weeks=30,
             heavy_bleeding=True,
             severe_abdominal_pain=True,
-            blood_pressure=95,
+            systolic_bp=95,
+            diastolic_bp=60,
+            heart_rate=110,
+            respiratory_rate=22,
+            spo2=93,
+            blood_sugar=145.0,
             body_temperature=38.1,
             fetal_movement="Reduced",
             consciousness="Drowsy",

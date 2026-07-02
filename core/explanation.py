@@ -30,8 +30,13 @@ def _build_feature_vector(patient: PatientInfo) -> List[float]:
         1.0 if patient.previous_c_section else 0.0,
         1.0 if patient.heavy_bleeding else 0.0,
         1.0 if patient.severe_abdominal_pain else 0.0,
-        float(patient.blood_pressure),
+        float(patient.systolic_bp),
+        float(patient.diastolic_bp),
+        float(patient.heart_rate),
+        float(patient.respiratory_rate),
         float(patient.body_temperature),
+        float(patient.spo2),
+        patient.blood_sugar,
         fetal_mapping.get(patient.fetal_movement, 0.0),
         consciousness_mapping.get(patient.consciousness, 0.0),
     ]
@@ -49,8 +54,13 @@ def _build_feature_names() -> List[str]:
         "previous_c_section",
         "heavy_bleeding",
         "severe_abdominal_pain",
-        "blood_pressure",
+        "systolic_bp",
+        "diastolic_bp",
+        "heart_rate",
+        "respiratory_rate",
         "body_temperature",
+        "spo2",
+        "blood_sugar",
         "fetal_movement",
         "consciousness",
     ]
@@ -70,8 +80,18 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
             "consciousness",
         }:
             shap_values.append(round(float(value) * 0.35, 3))
-        elif feature_names[index] in {"blood_pressure", "body_temperature", "bmi"}:
+        elif feature_names[index] in {
+            "systolic_bp",
+            "diastolic_bp",
+            "heart_rate",
+            "respiratory_rate",
+            "body_temperature",
+            "bmi",
+            "blood_sugar",
+        }:
             shap_values.append(round(float(value) / 100.0 * 0.2, 3))
+        elif feature_names[index] == "spo2":
+            shap_values.append(round((100.0 - float(value)) / 100.0 * 0.35, 3))
         else:
             shap_values.append(round(float(value) / 40.0 * 0.15, 3))
     return shap_values
@@ -80,7 +100,7 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
 def _render_bar_chart(values: List[float], labels: List[str], title: str, horizontal: bool = False) -> str:
     """Create a simple SVG bar chart for the explanation view."""
     width = 700
-    row_height = 22
+    row_height = 20
     margin_left = 160
     margin_top = 40
     bar_width = 24

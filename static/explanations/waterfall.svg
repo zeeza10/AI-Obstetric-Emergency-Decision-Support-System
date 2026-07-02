@@ -32,15 +32,30 @@
 <text x="568.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">severe_abdominal_pain</text>
 <text x="568.0" y="137" text-anchor="middle" font-size="12" font-family="Arial">+0.35</text>
 <rect x="600" y="207" width="24" height="73" fill="#2563eb" rx="4"/>
-<text x="612.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">blood_pressure</text>
+<text x="612.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">systolic_bp</text>
 <text x="612.0" y="199" text-anchor="middle" font-size="12" font-family="Arial">+0.19</text>
-<rect x="644" y="251" width="24" height="29" fill="#2563eb" rx="4"/>
-<text x="656.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">body_temperature</text>
-<text x="656.0" y="243" text-anchor="middle" font-size="12" font-family="Arial">+0.08</text>
-<rect x="688" y="213" width="24" height="67" fill="#2563eb" rx="4"/>
-<text x="700.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">fetal_movement</text>
-<text x="700.0" y="205" text-anchor="middle" font-size="12" font-family="Arial">+0.17</text>
-<rect x="732" y="213" width="24" height="67" fill="#2563eb" rx="4"/>
-<text x="744.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">consciousness</text>
-<text x="744.0" y="205" text-anchor="middle" font-size="12" font-family="Arial">+0.17</text>
+<rect x="644" y="234" width="24" height="46" fill="#2563eb" rx="4"/>
+<text x="656.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">diastolic_bp</text>
+<text x="656.0" y="226" text-anchor="middle" font-size="12" font-family="Arial">+0.12</text>
+<rect x="688" y="195" width="24" height="85" fill="#2563eb" rx="4"/>
+<text x="700.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">heart_rate</text>
+<text x="700.0" y="187" text-anchor="middle" font-size="12" font-family="Arial">+0.22</text>
+<rect x="732" y="263" width="24" height="17" fill="#2563eb" rx="4"/>
+<text x="744.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">respiratory_rate</text>
+<text x="744.0" y="255" text-anchor="middle" font-size="12" font-family="Arial">+0.04</text>
+<rect x="776" y="251" width="24" height="29" fill="#2563eb" rx="4"/>
+<text x="788.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">body_temperature</text>
+<text x="788.0" y="243" text-anchor="middle" font-size="12" font-family="Arial">+0.08</text>
+<rect x="820" y="271" width="24" height="9" fill="#2563eb" rx="4"/>
+<text x="832.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">spo2</text>
+<text x="832.0" y="263" text-anchor="middle" font-size="12" font-family="Arial">+0.03</text>
+<rect x="864" y="168" width="24" height="112" fill="#2563eb" rx="4"/>
+<text x="876.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">blood_sugar</text>
+<text x="876.0" y="160" text-anchor="middle" font-size="12" font-family="Arial">+0.29</text>
+<rect x="908" y="213" width="24" height="67" fill="#2563eb" rx="4"/>
+<text x="920.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">fetal_movement</text>
+<text x="920.0" y="205" text-anchor="middle" font-size="12" font-family="Arial">+0.17</text>
+<rect x="952" y="213" width="24" height="67" fill="#2563eb" rx="4"/>
+<text x="964.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">consciousness</text>
+<text x="964.0" y="205" text-anchor="middle" font-size="12" font-family="Arial">+0.17</text>
 </svg>

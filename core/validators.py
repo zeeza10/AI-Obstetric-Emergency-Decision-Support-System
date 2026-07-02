@@ -23,10 +23,20 @@ GRAVIDA_MIN = 1
 GRAVIDA_MAX = 15
 PARITY_MIN = 0
 PARITY_MAX = 14
-BLOOD_PRESSURE_MIN = 50
-BLOOD_PRESSURE_MAX = 250
+SYSTOLIC_BP_MIN = 50
+SYSTOLIC_BP_MAX = 250
+DIASTOLIC_BP_MIN = 30
+DIASTOLIC_BP_MAX = 150
+HEART_RATE_MIN = 40
+HEART_RATE_MAX = 200
+RESPIRATORY_RATE_MIN = 8
+RESPIRATORY_RATE_MAX = 40
 BODY_TEMPERATURE_MIN = 30.0
 BODY_TEMPERATURE_MAX = 45.0
+SPO2_MIN = 50
+SPO2_MAX = 100
+BLOOD_SUGAR_MIN = 30.0
+BLOOD_SUGAR_MAX = 600.0
 
 ALLOWED_FETAL_MOVEMENTS: Set[str] = {"Normal", "Reduced", "Absent"}
 ALLOWED_CONSCIOUSNESS_STATES: Set[str] = {"Alert", "Drowsy", "Unconscious"}
@@ -38,6 +48,12 @@ FIELD_LABELS = {
     "height_cm": "Height (cm)",
     "weight_kg": "Weight (kg)",
     "previous_c_section": "Previous C-Section",
+    "systolic_bp": "Systolic BP",
+    "diastolic_bp": "Diastolic BP",
+    "heart_rate": "Heart Rate",
+    "respiratory_rate": "Respiratory Rate",
+    "spo2": "SpO₂",
+    "blood_sugar": "Blood Sugar",
 }
 
 
@@ -239,6 +255,15 @@ def _validate_obstetric_counts(gravida: int, parity: int) -> None:
         )
 
 
+def _validate_blood_pressure(systolic_bp: int, diastolic_bp: int) -> None:
+    """Ensure blood pressure values are clinically consistent."""
+    if diastolic_bp >= systolic_bp:
+        raise InvalidNumericValueError(
+            "Diastolic BP must be lower than Systolic BP.",
+            field="diastolic_bp",
+        )
+
+
 def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo:
     """Parse and validate patient information from a request-like mapping."""
     age = _parse_required_int(_require_raw_value(form_data, "age"), "age", AGE_MIN, AGE_MAX)
@@ -285,17 +310,48 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         _require_raw_value(form_data, "severe_abdominal_pain"),
         "severe_abdominal_pain",
     )
-    blood_pressure = _parse_required_int(
-        _require_raw_value(form_data, "blood_pressure"),
-        "blood_pressure",
-        BLOOD_PRESSURE_MIN,
-        BLOOD_PRESSURE_MAX,
+    systolic_bp = _parse_required_int(
+        _require_raw_value(form_data, "systolic_bp"),
+        "systolic_bp",
+        SYSTOLIC_BP_MIN,
+        SYSTOLIC_BP_MAX,
+    )
+    diastolic_bp = _parse_required_int(
+        _require_raw_value(form_data, "diastolic_bp"),
+        "diastolic_bp",
+        DIASTOLIC_BP_MIN,
+        DIASTOLIC_BP_MAX,
+    )
+    _validate_blood_pressure(systolic_bp, diastolic_bp)
+    heart_rate = _parse_required_int(
+        _require_raw_value(form_data, "heart_rate"),
+        "heart_rate",
+        HEART_RATE_MIN,
+        HEART_RATE_MAX,
+    )
+    respiratory_rate = _parse_required_int(
+        _require_raw_value(form_data, "respiratory_rate"),
+        "respiratory_rate",
+        RESPIRATORY_RATE_MIN,
+        RESPIRATORY_RATE_MAX,
     )
     body_temperature = _parse_required_float(
         _require_raw_value(form_data, "body_temperature"),
         "body_temperature",
         BODY_TEMPERATURE_MIN,
         BODY_TEMPERATURE_MAX,
+    )
+    spo2 = _parse_required_int(
+        _require_raw_value(form_data, "spo2"),
+        "spo2",
+        SPO2_MIN,
+        SPO2_MAX,
+    )
+    blood_sugar = _parse_required_float(
+        _require_raw_value(form_data, "blood_sugar"),
+        "blood_sugar",
+        BLOOD_SUGAR_MIN,
+        BLOOD_SUGAR_MAX,
     )
     fetal_movement = _parse_required_choice(
         _require_raw_value(form_data, "fetal_movement"),
@@ -318,8 +374,13 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         previous_c_section=previous_c_section,
         heavy_bleeding=heavy_bleeding,
         severe_abdominal_pain=severe_abdominal_pain,
-        blood_pressure=blood_pressure,
+        systolic_bp=systolic_bp,
+        diastolic_bp=diastolic_bp,
+        heart_rate=heart_rate,
+        respiratory_rate=respiratory_rate,
         body_temperature=body_temperature,
+        spo2=spo2,
+        blood_sugar=blood_sugar,
         fetal_movement=fetal_movement,
         consciousness=consciousness,
     )
@@ -347,11 +408,15 @@ def validate_patient_information(patient: PatientInfo) -> None:
     _parse_required_int(patient.gravida, "gravida", GRAVIDA_MIN, GRAVIDA_MAX)
     _parse_required_int(patient.parity, "parity", PARITY_MIN, PARITY_MAX)
     _validate_obstetric_counts(patient.gravida, patient.parity)
+    _parse_required_int(patient.systolic_bp, "systolic_bp", SYSTOLIC_BP_MIN, SYSTOLIC_BP_MAX)
+    _parse_required_int(patient.diastolic_bp, "diastolic_bp", DIASTOLIC_BP_MIN, DIASTOLIC_BP_MAX)
+    _validate_blood_pressure(patient.systolic_bp, patient.diastolic_bp)
+    _parse_required_int(patient.heart_rate, "heart_rate", HEART_RATE_MIN, HEART_RATE_MAX)
     _parse_required_int(
-        patient.blood_pressure,
-        "blood_pressure",
-        BLOOD_PRESSURE_MIN,
-        BLOOD_PRESSURE_MAX,
+        patient.respiratory_rate,
+        "respiratory_rate",
+        RESPIRATORY_RATE_MIN,
+        RESPIRATORY_RATE_MAX,
     )
     _parse_required_float(
         patient.body_temperature,
@@ -359,6 +424,8 @@ def validate_patient_information(patient: PatientInfo) -> None:
         BODY_TEMPERATURE_MIN,
         BODY_TEMPERATURE_MAX,
     )
+    _parse_required_int(patient.spo2, "spo2", SPO2_MIN, SPO2_MAX)
+    _parse_required_float(patient.blood_sugar, "blood_sugar", BLOOD_SUGAR_MIN, BLOOD_SUGAR_MAX)
 
     if not isinstance(patient.previous_c_section, bool):
         raise InvalidYesNoError("Previous C-Section must be Yes or No.", field="previous_c_section")

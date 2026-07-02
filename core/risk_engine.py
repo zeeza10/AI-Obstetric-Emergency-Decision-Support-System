@@ -81,13 +81,38 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 2
             reasons.append("Severe abdominal pain suggests possible serious complications.")
 
-        if patient.blood_pressure < 90 or patient.blood_pressure > 140:
+        if patient.systolic_bp < 90 or patient.systolic_bp > 140 or patient.diastolic_bp > 90:
             score += 2
             reasons.append("Blood pressure is outside the expected range.")
+
+        if patient.heart_rate < 60 or patient.heart_rate > 100:
+            score += 1
+            reasons.append("Heart rate is outside the expected range.")
+        if patient.heart_rate < 50 or patient.heart_rate > 120:
+            score += 1
+            reasons.append("Abnormal heart rate may indicate hemodynamic instability.")
+
+        if patient.respiratory_rate < 12 or patient.respiratory_rate > 20:
+            score += 1
+            reasons.append("Respiratory rate is outside the expected range.")
+        if patient.respiratory_rate < 10 or patient.respiratory_rate > 24:
+            score += 1
+            reasons.append("Abnormal respiratory rate requires urgent review.")
 
         if patient.body_temperature >= 38.0:
             score += 2
             reasons.append("Elevated temperature may indicate infection or inflammation.")
+
+        if patient.spo2 < 95:
+            score += 1
+            reasons.append("Oxygen saturation is below the expected range.")
+        if patient.spo2 < 92:
+            score += 2
+            reasons.append("Low SpO₂ suggests possible hypoxemia.")
+
+        if patient.blood_sugar < 70 or patient.blood_sugar > 140:
+            score += 1
+            reasons.append("Blood sugar is outside the expected range.")
 
         if patient.fetal_movement == "Reduced":
             score += 2
@@ -106,7 +131,7 @@ class RuleBasedRiskEngine(RiskEngine):
         if (
             patient.heavy_bleeding
             and patient.severe_abdominal_pain
-            and patient.blood_pressure < 100
+            and patient.systolic_bp < 100
         ):
             score += 2
             reasons.append("Bleeding with abdominal pain and low blood pressure suggests instability.")
@@ -165,8 +190,13 @@ class SimplePersistedModel:
             "previous_c_section",
             "heavy_bleeding",
             "severe_abdominal_pain",
-            "blood_pressure",
+            "systolic_bp",
+            "diastolic_bp",
+            "heart_rate",
+            "respiratory_rate",
             "body_temperature",
+            "spo2",
+            "blood_sugar",
             "fetal_movement",
             "consciousness",
         ]
@@ -185,8 +215,13 @@ class SimplePersistedModel:
             1.0 if patient.previous_c_section else 0.0,
             1.0 if patient.heavy_bleeding else 0.0,
             1.0 if patient.severe_abdominal_pain else 0.0,
-            float(patient.blood_pressure),
+            float(patient.systolic_bp),
+            float(patient.diastolic_bp),
+            float(patient.heart_rate),
+            float(patient.respiratory_rate),
             float(patient.body_temperature),
+            float(patient.spo2),
+            patient.blood_sugar,
             fetal_mapping.get(patient.fetal_movement, 0.0),
             consciousness_mapping.get(patient.consciousness, 0.0),
         ]
@@ -207,10 +242,15 @@ class SimplePersistedModel:
         previous_c_section = vector[7]
         bleeding = vector[8]
         pain = vector[9]
-        bp = vector[10]
-        temp = vector[11]
-        fetal = vector[12]
-        consciousness = vector[13]
+        systolic_bp = vector[10]
+        diastolic_bp = vector[11]
+        heart_rate = vector[12]
+        respiratory_rate = vector[13]
+        temp = vector[14]
+        spo2 = vector[15]
+        blood_sugar = vector[16]
+        fetal = vector[17]
+        consciousness = vector[18]
 
         severity_score = 0.0
         severity_score += 0.02 * max(0.0, age - 25.0)
@@ -220,8 +260,13 @@ class SimplePersistedModel:
         severity_score += 0.08 * previous_c_section
         severity_score += 0.35 * bleeding
         severity_score += 0.25 * pain
-        severity_score += 0.01 * max(0.0, 120.0 - bp)
+        severity_score += 0.01 * max(0.0, 120.0 - systolic_bp)
+        severity_score += 0.008 * max(0.0, diastolic_bp - 80.0)
+        severity_score += 0.005 * max(0.0, abs(heart_rate - 80.0) - 10.0)
+        severity_score += 0.005 * max(0.0, abs(respiratory_rate - 16.0) - 4.0)
         severity_score += 0.12 * max(0.0, temp - 37.0)
+        severity_score += 0.01 * max(0.0, 95.0 - spo2)
+        severity_score += 0.004 * max(0.0, abs(blood_sugar - 100.0) - 20.0)
         severity_score += 0.25 * fetal
         severity_score += 0.2 * consciousness
 
