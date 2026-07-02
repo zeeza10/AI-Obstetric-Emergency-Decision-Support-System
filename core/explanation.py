@@ -18,29 +18,90 @@ EXPLANATION_DIR.mkdir(parents=True, exist_ok=True)
 def _build_feature_vector(patient: PatientInfo) -> List[float]:
     """Build a numeric feature vector for explanation generation."""
     fetal_mapping = {"Normal": 0.0, "Reduced": 0.5, "Absent": 1.0}
-    consciousness_mapping = {"Alert": 0.0, "Drowsy": 0.5, "Unconscious": 1.0}
+    bleeding_mapping = {"None": 0.0, "Light": 0.25, "Moderate": 0.5, "Heavy": 0.75, "Severe": 1.0}
+    urine_mapping = {"Negative": 0.0, "Trace": 0.1, "1+": 0.25, "2+": 0.5, "3+": 0.75, "4+": 1.0}
     return [
         float(patient.age),
+        float(patient.height_cm),
+        float(patient.weight_kg),
+        patient.bmi,
         float(patient.pregnancy_weeks),
-        1.0 if patient.heavy_bleeding else 0.0,
-        1.0 if patient.severe_abdominal_pain else 0.0,
-        float(patient.blood_pressure),
-        float(patient.body_temperature),
+        float(patient.gravida),
+        float(patient.parity),
+        1.0 if patient.previous_c_section else 0.0,
+        1.0 if patient.heavy_vaginal_bleeding else 0.0,
+        bleeding_mapping.get(patient.bleeding_severity, 0.0),
+        1.0 if patient.abdominal_pain else 0.0,
+        float(patient.pain_score) / 10.0,
         fetal_mapping.get(patient.fetal_movement, 0.0),
-        consciousness_mapping.get(patient.consciousness, 0.0),
+        1.0 if patient.loss_of_consciousness else 0.0,
+        1.0 if patient.convulsions else 0.0,
+        1.0 if patient.headache else 0.0,
+        1.0 if patient.blurred_vision else 0.0,
+        1.0 if patient.difficulty_breathing else 0.0,
+        1.0 if patient.chest_pain else 0.0,
+        1.0 if patient.vomiting else 0.0,
+        float(patient.systolic_bp),
+        float(patient.diastolic_bp),
+        float(patient.heart_rate),
+        float(patient.respiratory_rate),
+        float(patient.body_temperature),
+        float(patient.spo2),
+        patient.blood_sugar,
+        patient.hemoglobin,
+        urine_mapping.get(patient.urine_protein, 0.0),
+        float(patient.platelet_count),
+        urine_mapping.get(patient.urine_glucose, 0.0),
+        1.0 if patient.hypertension else 0.0,
+        1.0 if patient.diabetes else 0.0,
+        1.0 if patient.anemia else 0.0,
+        1.0 if patient.heart_disease else 0.0,
+        1.0 if patient.multiple_pregnancy else 0.0,
+        1.0 if patient.previous_preeclampsia else 0.0,
+        1.0 if patient.previous_hemorrhage else 0.0,
     ]
 
 
 def _build_feature_names() -> List[str]:
     return [
         "age",
+        "height_cm",
+        "weight_kg",
+        "bmi",
         "pregnancy_weeks",
-        "heavy_bleeding",
-        "severe_abdominal_pain",
-        "blood_pressure",
-        "body_temperature",
+        "gravida",
+        "parity",
+        "previous_c_section",
+        "heavy_vaginal_bleeding",
+        "bleeding_severity",
+        "abdominal_pain",
+        "pain_score",
         "fetal_movement",
-        "consciousness",
+        "loss_of_consciousness",
+        "convulsions",
+        "headache",
+        "blurred_vision",
+        "difficulty_breathing",
+        "chest_pain",
+        "vomiting",
+        "systolic_bp",
+        "diastolic_bp",
+        "heart_rate",
+        "respiratory_rate",
+        "body_temperature",
+        "spo2",
+        "blood_sugar",
+        "hemoglobin",
+        "urine_protein",
+        "platelet_count",
+        "urine_glucose",
+        "hypertension",
+        "diabetes",
+        "anemia",
+        "heart_disease",
+        "multiple_pregnancy",
+        "previous_preeclampsia",
+        "previous_hemorrhage",
     ]
 
 
@@ -48,12 +109,54 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
     """Estimate SHAP-style contributions from a simple clinical scoring function."""
     feature_names = _build_feature_names()
     values = _build_feature_vector(patient)
+    boolean_features = {
+        "previous_c_section",
+        "heavy_vaginal_bleeding",
+        "abdominal_pain",
+        "loss_of_consciousness",
+        "convulsions",
+        "headache",
+        "blurred_vision",
+        "difficulty_breathing",
+        "chest_pain",
+        "vomiting",
+        "fetal_movement",
+        "bleeding_severity",
+        "urine_protein",
+        "urine_glucose",
+        "hypertension",
+        "diabetes",
+        "anemia",
+        "heart_disease",
+        "multiple_pregnancy",
+        "previous_preeclampsia",
+        "previous_hemorrhage",
+    }
+    vital_features = {
+        "systolic_bp",
+        "diastolic_bp",
+        "heart_rate",
+        "respiratory_rate",
+        "body_temperature",
+        "bmi",
+        "blood_sugar",
+        "hemoglobin",
+        "platelet_count",
+    }
     shap_values: List[float] = []
     for index, value in enumerate(values):
-        if feature_names[index] in {"heavy_bleeding", "severe_abdominal_pain", "fetal_movement", "consciousness"}:
+        name = feature_names[index]
+        if name in boolean_features or name == "pain_score":
             shap_values.append(round(float(value) * 0.35, 3))
-        elif feature_names[index] in {"blood_pressure", "body_temperature"}:
-            shap_values.append(round(float(value) / 100.0 * 0.2, 3))
+        elif name in vital_features:
+            if name == "hemoglobin":
+                shap_values.append(round(max(0.0, 11.0 - float(value)) / 11.0 * 0.35, 3))
+            elif name == "platelet_count":
+                shap_values.append(round(max(0.0, 150.0 - float(value)) / 150.0 * 0.35, 3))
+            else:
+                shap_values.append(round(float(value) / 100.0 * 0.2, 3))
+        elif name == "spo2":
+            shap_values.append(round((100.0 - float(value)) / 100.0 * 0.35, 3))
         else:
             shap_values.append(round(float(value) / 40.0 * 0.15, 3))
     return shap_values
@@ -62,13 +165,13 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
 def _render_bar_chart(values: List[float], labels: List[str], title: str, horizontal: bool = False) -> str:
     """Create a simple SVG bar chart for the explanation view."""
     width = 700
-    height = 360
-    margin_left = 140
+    row_height = 18
+    margin_left = 160
     margin_top = 40
-    bar_width = 28
+    bar_width = 24
     chart_height = 240
+    height = margin_top + (len(labels) * row_height) + 24 if horizontal else 360
     max_value = max(abs(value) for value in values) or 1.0
-    chart_width = (len(labels) * (bar_width + 20)) - 20
 
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
@@ -79,7 +182,7 @@ def _render_bar_chart(values: List[float], labels: List[str], title: str, horizo
     for index, (label, value) in enumerate(zip(labels, values)):
         if horizontal:
             x = margin_left
-            y = margin_top + index * 24
+            y = margin_top + index * row_height
             bar_height = 14
             bar_length = int((abs(value) / max_value) * 180)
             bar_color = "#2563eb" if value >= 0 else "#dc2626"

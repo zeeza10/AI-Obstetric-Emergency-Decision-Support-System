@@ -256,6 +256,13 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 0 0.2rem rgba(13, 148, 136, 0.15);
 }
 
+.form-control-readonly {
+    background-color: #f8fafc;
+    color: var(--hz-navy);
+    font-weight: 600;
+    cursor: default;
+}
+
 .input-hint {
     font-size: 0.78rem;
     color: var(--hz-muted);
@@ -519,6 +526,78 @@ h1, h2, h3, h4, h5, h6 {
     background: #fff;
 }
 
+/* Error pages */
+.error-card {
+    background: var(--hz-surface);
+    border: 1px solid var(--hz-border);
+    border-radius: var(--hz-radius-lg);
+    box-shadow: var(--hz-shadow-md);
+    padding: 3rem 2rem;
+}
+
+.error-icon {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1.25rem;
+}
+
+.error-icon-warning {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    color: var(--hz-warning);
+    border: 1px solid #fde68a;
+}
+
+.error-icon-danger {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    color: var(--hz-danger);
+    border: 1px solid #fecaca;
+}
+
+.error-code {
+    font-size: clamp(3rem, 8vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--hz-navy);
+    letter-spacing: -0.04em;
+    margin-bottom: 0.5rem;
+}
+
+.error-title {
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 700;
+    color: var(--hz-navy);
+    margin-bottom: 0.75rem;
+}
+
+.error-message {
+    color: var(--hz-muted);
+    font-size: 1rem;
+    max-width: 32rem;
+    margin: 0 auto 1.75rem;
+    line-height: 1.65;
+}
+
+.error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.error-support {
+    font-size: 0.85rem;
+    color: var(--hz-muted);
+}
+
+.error-support strong {
+    color: var(--hz-primary-dark);
+}
+
 /* Footer */
 .site-footer {
     background: linear-gradient(135deg, #0c4a6e 0%, #134e4a 100%);
@@ -662,6 +741,14 @@ h1, h2, h3, h4, h5, h6 {
     }
 
     .choice-group .btn {
+        width: 100%;
+    }
+
+    .error-card {
+        padding: 2rem 1.25rem;
+    }
+
+    .error-actions .btn {
         width: 100%;
     }
 }

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found · {{ config['APP_NAME'] }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+            <div class="error-card text-center">
+                <div class="error-icon error-icon-warning" aria-hidden="true">
+                    <i class="bi bi-compass"></i>
+                </div>
+                <div class="error-code">404</div>
+                <h1 class="error-title">Page Not Found</h1>
+                <p class="error-message">
+                    The page you requested could not be located. It may have been moved, removed,
+                    or the address may have been entered incorrectly.
+                </p>
+                <div class="error-actions">
+                    <a class="btn btn-primary" href="{{ url_for('index') }}">
+                        <i class="bi bi-house-door me-2"></i>
+                        Return to Assessment
+                    </a>
+                    <a class="btn btn-outline-hz" href="{{ url_for('health') }}">
+                        <i class="bi bi-heart-pulse me-2"></i>
+                        System Status
+                    </a>
+                </div>
+                <p class="error-support mt-4 mb-0">
+                    Powered by <strong>{{ config['COMPANY_NAME'] }}</strong> · Clinical Decision Support
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

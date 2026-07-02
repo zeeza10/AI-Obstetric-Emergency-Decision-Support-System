@@ -51,7 +51,7 @@
                                     <form method="post" action="{{ url_for('predict') }}" novalidate>
                                         <div class="section-label">
                                             <i class="bi bi-person-vcard"></i>
-                                            Demographics
+                                            Demographics & Obstetric History
                                         </div>
                                         <div class="row g-3">
                                             <div class="col-sm-6">
@@ -60,33 +60,215 @@
                                                 <div class="input-hint">Range: 12–55</div>
                                             </div>
                                             <div class="col-sm-6">
+                                                <label class="form-label" for="height_cm">Height (cm)</label>
+                                                <input class="form-control bmi-input" id="height_cm" name="height_cm" type="number" min="100" max="220" placeholder="e.g. 165" required>
+                                                <div class="input-hint">Range: 100–220</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="weight_kg">Weight (kg)</label>
+                                                <input class="form-control bmi-input" id="weight_kg" name="weight_kg" type="number" step="0.1" min="30" max="200" placeholder="e.g. 68" required>
+                                                <div class="input-hint">Range: 30–200</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="bmi_display">BMI (Auto Calculate)</label>
+                                                <input class="form-control form-control-readonly" id="bmi_display" type="text" placeholder="Calculated automatically" readonly tabindex="-1" aria-readonly="true">
+                                                <div class="input-hint">Computed from height and weight</div>
+                                            </div>
+                                            <div class="col-sm-6">
                                                 <label class="form-label" for="pregnancy_weeks">Pregnancy Weeks</label>
                                                 <input class="form-control" id="pregnancy_weeks" name="pregnancy_weeks" type="number" min="1" max="45" placeholder="e.g. 32" required>
                                                 <div class="input-hint">Range: 1–45</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="gravida">Gravida</label>
+                                                <input class="form-control" id="gravida" name="gravida" type="number" min="1" max="15" placeholder="e.g. 2" required>
+                                                <div class="input-hint">Total pregnancies including current</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="parity">Parity</label>
+                                                <input class="form-control" id="parity" name="parity" type="number" min="0" max="14" placeholder="e.g. 1" required>
+                                                <div class="input-hint">Previous births at or beyond 20 weeks</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Previous C-Section</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Previous C-Section">
+                                                    <input type="radio" class="btn-check" name="previous_c_section" id="csection-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="csection-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="previous_c_section" id="csection-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="csection-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Hypertension</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Hypertension">
+                                                    <input type="radio" class="btn-check" name="hypertension" id="hypertension-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="hypertension-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="hypertension" id="hypertension-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="hypertension-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Diabetes</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Diabetes">
+                                                    <input type="radio" class="btn-check" name="diabetes" id="diabetes-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="diabetes-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="diabetes" id="diabetes-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="diabetes-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Anemia</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Anemia">
+                                                    <input type="radio" class="btn-check" name="anemia" id="anemia-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="anemia-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="anemia" id="anemia-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="anemia-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Heart Disease</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Heart Disease">
+                                                    <input type="radio" class="btn-check" name="heart_disease" id="heart-disease-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="heart-disease-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="heart_disease" id="heart-disease-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="heart-disease-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Multiple Pregnancy</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Multiple Pregnancy">
+                                                    <input type="radio" class="btn-check" name="multiple_pregnancy" id="multiple-pregnancy-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="multiple-pregnancy-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="multiple_pregnancy" id="multiple-pregnancy-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="multiple-pregnancy-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Previous Preeclampsia</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Previous Preeclampsia">
+                                                    <input type="radio" class="btn-check" name="previous_preeclampsia" id="previous-preeclampsia-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="previous-preeclampsia-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="previous_preeclampsia" id="previous-preeclampsia-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="previous-preeclampsia-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Previous Hemorrhage</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Previous Hemorrhage">
+                                                    <input type="radio" class="btn-check" name="previous_hemorrhage" id="previous-hemorrhage-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="previous-hemorrhage-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="previous_hemorrhage" id="previous-hemorrhage-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="previous-hemorrhage-no">No</label>
+                                                </div>
                                             </div>
                                         </div>
 
                                         <div class="section-label">
                                             <i class="bi bi-activity"></i>
-                                            Clinical Signs
+                                            Clinical Signs & Symptoms
                                         </div>
                                         <div class="row g-3">
                                             <div class="col-md-6">
-                                                <label class="form-label">Heavy Bleeding</label>
-                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Heavy bleeding">
-                                                    <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-yes" value="true" required>
+                                                <label class="form-label">Heavy Vaginal Bleeding</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Heavy vaginal bleeding">
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="bleeding" name="heavy_vaginal_bleeding" id="bleeding-yes" value="true" required>
                                                     <label class="btn btn-outline-danger" for="bleeding-yes">Yes</label>
-                                                    <input type="radio" class="btn-check" name="heavy_bleeding" id="bleeding-no" value="false" checked>
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="bleeding" name="heavy_vaginal_bleeding" id="bleeding-no" value="false" checked>
                                                     <label class="btn btn-outline-hz btn-outline-hz-active" for="bleeding-no">No</label>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Severe Abdominal Pain</label>
-                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Severe abdominal pain">
-                                                    <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-yes" value="true" required>
+                                                <label class="form-label" for="bleeding_severity">Bleeding Severity</label>
+                                                <select class="form-select" id="bleeding_severity" name="bleeding_severity" required>
+                                                    <option value="None" selected>None</option>
+                                                    <option value="Light">Light</option>
+                                                    <option value="Moderate">Moderate</option>
+                                                    <option value="Heavy">Heavy</option>
+                                                    <option value="Severe">Severe</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Abdominal Pain</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Abdominal pain">
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="pain" name="abdominal_pain" id="pain-yes" value="true" required>
                                                     <label class="btn btn-outline-danger" for="pain-yes">Yes</label>
-                                                    <input type="radio" class="btn-check" name="severe_abdominal_pain" id="pain-no" value="false" checked>
+                                                    <input type="radio" class="btn-check symptom-toggle" data-target="pain" name="abdominal_pain" id="pain-no" value="false" checked>
                                                     <label class="btn btn-outline-hz btn-outline-hz-active" for="pain-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="pain_score">Pain Score (0–10)</label>
+                                                <input class="form-control" id="pain_score" name="pain_score" type="number" min="0" max="10" value="0" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="fetal_movement">Fetal Movement</label>
+                                                <select class="form-select" id="fetal_movement" name="fetal_movement" required>
+                                                    <option value="Normal">Normal</option>
+                                                    <option value="Reduced">Reduced</option>
+                                                    <option value="Absent">Absent</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Loss of Consciousness</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Loss of consciousness">
+                                                    <input type="radio" class="btn-check" name="loss_of_consciousness" id="loc-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="loc-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="loss_of_consciousness" id="loc-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="loc-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Convulsions</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Convulsions">
+                                                    <input type="radio" class="btn-check" name="convulsions" id="convulsions-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="convulsions-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="convulsions" id="convulsions-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="convulsions-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Headache</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Headache">
+                                                    <input type="radio" class="btn-check" name="headache" id="headache-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="headache-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="headache" id="headache-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="headache-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Blurred Vision</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Blurred vision">
+                                                    <input type="radio" class="btn-check" name="blurred_vision" id="vision-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="vision-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="blurred_vision" id="vision-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="vision-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Difficulty Breathing</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Difficulty breathing">
+                                                    <input type="radio" class="btn-check" name="difficulty_breathing" id="breathing-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="breathing-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="difficulty_breathing" id="breathing-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="breathing-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Chest Pain</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Chest pain">
+                                                    <input type="radio" class="btn-check" name="chest_pain" id="chest-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="chest-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="chest_pain" id="chest-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="chest-no">No</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Vomiting</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Vomiting">
+                                                    <input type="radio" class="btn-check" name="vomiting" id="vomiting-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="vomiting-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="vomiting" id="vomiting-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="vomiting-no">No</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -97,27 +279,70 @@
                                         </div>
                                         <div class="row g-3">
                                             <div class="col-sm-6">
-                                                <label class="form-label" for="blood_pressure">Blood Pressure (mmHg)</label>
-                                                <input class="form-control" id="blood_pressure" name="blood_pressure" type="number" min="50" max="250" placeholder="e.g. 120" required>
+                                                <label class="form-label" for="systolic_bp">Systolic BP (mmHg)</label>
+                                                <input class="form-control" id="systolic_bp" name="systolic_bp" type="number" min="50" max="250" placeholder="e.g. 120" required>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="diastolic_bp">Diastolic BP (mmHg)</label>
+                                                <input class="form-control" id="diastolic_bp" name="diastolic_bp" type="number" min="30" max="150" placeholder="e.g. 80" required>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="heart_rate">Heart Rate (bpm)</label>
+                                                <input class="form-control" id="heart_rate" name="heart_rate" type="number" min="40" max="200" placeholder="e.g. 78" required>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="respiratory_rate">Respiratory Rate (/min)</label>
+                                                <input class="form-control" id="respiratory_rate" name="respiratory_rate" type="number" min="8" max="40" placeholder="e.g. 16" required>
                                             </div>
                                             <div class="col-sm-6">
                                                 <label class="form-label" for="body_temperature">Body Temperature (°C)</label>
                                                 <input class="form-control" id="body_temperature" name="body_temperature" type="number" step="0.1" min="30" max="45" placeholder="e.g. 36.8" required>
                                             </div>
                                             <div class="col-sm-6">
-                                                <label class="form-label" for="fetal_movement">Fetal Movement</label>
-                                                <select class="form-select" id="fetal_movement" name="fetal_movement" required>
-                                                    <option value="Normal">Normal</option>
-                                                    <option value="Reduced">Reduced</option>
-                                                    <option value="Absent">Absent</option>
+                                                <label class="form-label" for="spo2">SpO₂ (%)</label>
+                                                <input class="form-control" id="spo2" name="spo2" type="number" min="50" max="100" placeholder="e.g. 98" required>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="blood_sugar">Blood Sugar (mg/dL)</label>
+                                                <input class="form-control" id="blood_sugar" name="blood_sugar" type="number" step="0.1" min="30" max="600" placeholder="e.g. 95" required>
+                                            </div>
+                                        </div>
+
+                                        <div class="section-label">
+                                            <i class="bi bi-droplet-half"></i>
+                                            Lab Findings
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="hemoglobin">Hemoglobin (g/dL)</label>
+                                                <input class="form-control" id="hemoglobin" name="hemoglobin" type="number" step="0.1" min="3" max="20" placeholder="e.g. 12.0" required>
+                                                <div class="input-hint">Range: 3â€“20</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="platelet_count">Platelet Count (x10^9/L)</label>
+                                                <input class="form-control" id="platelet_count" name="platelet_count" type="number" min="10" max="1000" placeholder="e.g. 250" required>
+                                                <div class="input-hint">Range: 10â€“1000</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="urine_protein">Urine Protein</label>
+                                                <select class="form-select" id="urine_protein" name="urine_protein" required>
+                                                    <option value="Negative" selected>Negative</option>
+                                                    <option value="Trace">Trace</option>
+                                                    <option value="1+">1+</option>
+                                                    <option value="2+">2+</option>
+                                                    <option value="3+">3+</option>
+                                                    <option value="4+">4+</option>
                                                 </select>
                                             </div>
                                             <div class="col-sm-6">
-                                                <label class="form-label" for="consciousness">Consciousness</label>
-                                                <select class="form-select" id="consciousness" name="consciousness" required>
-                                                    <option value="Alert">Alert</option>
-                                                    <option value="Drowsy">Drowsy</option>
-                                                    <option value="Unconscious">Unconscious</option>
+                                                <label class="form-label" for="urine_glucose">Urine Glucose</label>
+                                                <select class="form-select" id="urine_glucose" name="urine_glucose" required>
+                                                    <option value="Negative" selected>Negative</option>
+                                                    <option value="Trace">Trace</option>
+                                                    <option value="1+">1+</option>
+                                                    <option value="2+">2+</option>
+                                                    <option value="3+">3+</option>
+                                                    <option value="4+">4+</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -138,4 +363,49 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function updateBmiDisplay() {
+        const heightInput = document.getElementById("height_cm");
+        const weightInput = document.getElementById("weight_kg");
+        const bmiDisplay = document.getElementById("bmi_display");
+        const height = parseFloat(heightInput.value);
+        const weight = parseFloat(weightInput.value);
+
+        if (height > 0 && weight > 0) {
+            const heightMeters = height / 100;
+            const bmi = weight / (heightMeters * heightMeters);
+            bmiDisplay.value = bmi.toFixed(1);
+        } else {
+            bmiDisplay.value = "";
+        }
+    }
+
+    document.querySelectorAll(".bmi-input").forEach((input) => {
+        input.addEventListener("input", updateBmiDisplay);
+    });
+
+    function updateSymptomFields() {
+        const bleedingYes = document.getElementById("bleeding-yes").checked;
+        const bleedingSeverity = document.getElementById("bleeding_severity");
+        if (!bleedingYes) {
+            bleedingSeverity.value = "None";
+        }
+
+        const painYes = document.getElementById("pain-yes").checked;
+        const painScore = document.getElementById("pain_score");
+        if (!painYes) {
+            painScore.value = "0";
+        } else if (parseInt(painScore.value, 10) < 1) {
+            painScore.value = "1";
+        }
+    }
+
+    document.querySelectorAll(".symptom-toggle").forEach((input) => {
+        input.addEventListener("change", updateSymptomFields);
+    });
+    updateSymptomFields();
+</script>
 {% endblock %}
