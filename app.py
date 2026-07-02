@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from flask import Flask, render_template, request
 
+from config import get_config
 from core import (
     InvalidChoiceError,
     InvalidNumericValueError,
@@ -13,7 +14,13 @@ from core import (
 from core.explanation import generate_shap_explanation
 from predict import predict_from_form_data
 
+config = get_config()
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.config["SECRET_KEY"] = config.secret_key
+app.config["APP_NAME"] = config.app_name
+app.config["APP_VERSION"] = config.version
+app.config["COMPANY_NAME"] = config.company_name
+app.config["FOOTER_TEXT"] = config.footer_text
 
 
 @app.route("/", methods=["GET"])
@@ -46,4 +53,4 @@ def health() -> dict[str, str]:
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=config.debug, host="0.0.0.0", port=5000)
