@@ -7,18 +7,18 @@
 <rect x="204" y="40" width="24" height="240" fill="#2563eb" rx="4"/>
 <text x="216.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">height_cm</text>
 <text x="216.0" y="32" text-anchor="middle" font-size="12" font-family="Arial">+0.62</text>
-<rect x="248" y="182" width="24" height="98" fill="#2563eb" rx="4"/>
+<rect x="248" y="186" width="24" height="94" fill="#2563eb" rx="4"/>
 <text x="260.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">weight_kg</text>
-<text x="260.0" y="174" text-anchor="middle" font-size="12" font-family="Arial">+0.26</text>
-<rect x="292" y="261" width="24" height="19" fill="#2563eb" rx="4"/>
+<text x="260.0" y="178" text-anchor="middle" font-size="12" font-family="Arial">+0.24</text>
+<rect x="292" y="262" width="24" height="18" fill="#2563eb" rx="4"/>
 <text x="304.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">bmi</text>
-<text x="304.0" y="253" text-anchor="middle" font-size="12" font-family="Arial">+0.05</text>
+<text x="304.0" y="254" text-anchor="middle" font-size="12" font-family="Arial">+0.05</text>
 <rect x="336" y="234" width="24" height="46" fill="#2563eb" rx="4"/>
 <text x="348.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">pregnancy_weeks</text>
 <text x="348.0" y="226" text-anchor="middle" font-size="12" font-family="Arial">+0.12</text>
-<rect x="380" y="278" width="24" height="2" fill="#2563eb" rx="4"/>
+<rect x="380" y="276" width="24" height="4" fill="#2563eb" rx="4"/>
 <text x="392.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">gravida</text>
-<text x="392.0" y="270" text-anchor="middle" font-size="12" font-family="Arial">+0.01</text>
+<text x="392.0" y="268" text-anchor="middle" font-size="12" font-family="Arial">+0.01</text>
 <rect x="424" y="279" width="24" height="1" fill="#2563eb" rx="4"/>
 <text x="436.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">parity</text>
 <text x="436.0" y="271" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
@@ -46,9 +46,9 @@
 <rect x="776" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="788.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">convulsions</text>
 <text x="788.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
-<rect x="820" y="145" width="24" height="135" fill="#2563eb" rx="4"/>
+<rect x="820" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="832.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">headache</text>
-<text x="832.0" y="137" text-anchor="middle" font-size="12" font-family="Arial">+0.35</text>
+<text x="832.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
 <rect x="864" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="876.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">blurred_vision</text>
 <text x="876.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
@@ -61,57 +61,57 @@
 <rect x="996" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1008.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">vomiting</text>
 <text x="1008.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
-<rect x="1040" y="167" width="24" height="113" fill="#2563eb" rx="4"/>
+<rect x="1040" y="187" width="24" height="93" fill="#2563eb" rx="4"/>
 <text x="1052.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">systolic_bp</text>
-<text x="1052.0" y="159" text-anchor="middle" font-size="12" font-family="Arial">+0.29</text>
-<rect x="1084" y="208" width="24" height="72" fill="#2563eb" rx="4"/>
+<text x="1052.0" y="179" text-anchor="middle" font-size="12" font-family="Arial">+0.24</text>
+<rect x="1084" y="218" width="24" height="62" fill="#2563eb" rx="4"/>
 <text x="1096.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">diastolic_bp</text>
-<text x="1096.0" y="200" text-anchor="middle" font-size="12" font-family="Arial">+0.19</text>
+<text x="1096.0" y="210" text-anchor="middle" font-size="12" font-family="Arial">+0.16</text>
 <rect x="1128" y="220" width="24" height="60" fill="#2563eb" rx="4"/>
 <text x="1140.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">heart_rate</text>
 <text x="1140.0" y="212" text-anchor="middle" font-size="12" font-family="Arial">+0.16</text>
-<rect x="1172" y="268" width="24" height="12" fill="#2563eb" rx="4"/>
+<rect x="1172" y="269" width="24" height="11" fill="#2563eb" rx="4"/>
 <text x="1184.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">respiratory_rate</text>
-<text x="1184.0" y="260" text-anchor="middle" font-size="12" font-family="Arial">+0.03</text>
-<rect x="1216" y="252" width="24" height="28" fill="#2563eb" rx="4"/>
+<text x="1184.0" y="261" text-anchor="middle" font-size="12" font-family="Arial">+0.03</text>
+<rect x="1216" y="253" width="24" height="27" fill="#2563eb" rx="4"/>
 <text x="1228.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">body_temperature</text>
-<text x="1228.0" y="244" text-anchor="middle" font-size="12" font-family="Arial">+0.07</text>
-<rect x="1260" y="278" width="24" height="2" fill="#2563eb" rx="4"/>
+<text x="1228.0" y="245" text-anchor="middle" font-size="12" font-family="Arial">+0.07</text>
+<rect x="1260" y="275" width="24" height="5" fill="#2563eb" rx="4"/>
 <text x="1272.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">spo2</text>
-<text x="1272.0" y="270" text-anchor="middle" font-size="12" font-family="Arial">+0.01</text>
-<rect x="1304" y="133" width="24" height="147" fill="#2563eb" rx="4"/>
+<text x="1272.0" y="267" text-anchor="middle" font-size="12" font-family="Arial">+0.01</text>
+<rect x="1304" y="207" width="24" height="73" fill="#2563eb" rx="4"/>
 <text x="1316.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">blood_sugar</text>
-<text x="1316.0" y="125" text-anchor="middle" font-size="12" font-family="Arial">+0.38</text>
-<rect x="1348" y="249" width="24" height="31" fill="#2563eb" rx="4"/>
+<text x="1316.0" y="199" text-anchor="middle" font-size="12" font-family="Arial">+0.19</text>
+<rect x="1348" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1360.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">hemoglobin</text>
-<text x="1360.0" y="241" text-anchor="middle" font-size="12" font-family="Arial">+0.08</text>
-<rect x="1392" y="179" width="24" height="101" fill="#2563eb" rx="4"/>
+<text x="1360.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
+<rect x="1392" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1404.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">urine_protein</text>
-<text x="1404.0" y="171" text-anchor="middle" font-size="12" font-family="Arial">+0.26</text>
-<rect x="1436" y="222" width="24" height="58" fill="#2563eb" rx="4"/>
+<text x="1404.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
+<rect x="1436" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1448.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">platelet_count</text>
-<text x="1448.0" y="214" text-anchor="middle" font-size="12" font-family="Arial">+0.15</text>
-<rect x="1480" y="213" width="24" height="67" fill="#2563eb" rx="4"/>
+<text x="1448.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
+<rect x="1480" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1492.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">urine_glucose</text>
-<text x="1492.0" y="205" text-anchor="middle" font-size="12" font-family="Arial">+0.17</text>
-<rect x="1524" y="145" width="24" height="135" fill="#2563eb" rx="4"/>
+<text x="1492.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
+<rect x="1524" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1536.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">hypertension</text>
-<text x="1536.0" y="137" text-anchor="middle" font-size="12" font-family="Arial">+0.35</text>
-<rect x="1568" y="145" width="24" height="135" fill="#2563eb" rx="4"/>
+<text x="1536.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
+<rect x="1568" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1580.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">diabetes</text>
-<text x="1580.0" y="137" text-anchor="middle" font-size="12" font-family="Arial">+0.35</text>
-<rect x="1612" y="145" width="24" height="135" fill="#2563eb" rx="4"/>
+<text x="1580.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
+<rect x="1612" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1624.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">anemia</text>
-<text x="1624.0" y="137" text-anchor="middle" font-size="12" font-family="Arial">+0.35</text>
+<text x="1624.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
 <rect x="1656" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1668.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">heart_disease</text>
 <text x="1668.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
 <rect x="1700" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1712.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">multiple_pregnancy</text>
 <text x="1712.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
-<rect x="1744" y="145" width="24" height="135" fill="#2563eb" rx="4"/>
+<rect x="1744" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1756.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">previous_preeclampsia</text>
-<text x="1756.0" y="137" text-anchor="middle" font-size="12" font-family="Arial">+0.35</text>
+<text x="1756.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
 <rect x="1788" y="280" width="24" height="0" fill="#2563eb" rx="4"/>
 <text x="1800.0" y="344" text-anchor="middle" font-size="12" font-family="Arial">previous_hemorrhage</text>
 <text x="1800.0" y="272" text-anchor="middle" font-size="12" font-family="Arial">+0.00</text>
