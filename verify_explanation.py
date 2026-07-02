@@ -4,7 +4,12 @@ from core.risk_engine import AssessmentResult
 
 patient = PatientInfo(
     age=30,
+    height_cm=160,
+    weight_kg=72.5,
     pregnancy_weeks=30,
+    gravida=3,
+    parity=2,
+    previous_c_section=True,
     heavy_bleeding=True,
     severe_abdominal_pain=True,
     blood_pressure=95,

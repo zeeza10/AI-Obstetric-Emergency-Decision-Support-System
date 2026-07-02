@@ -51,7 +51,7 @@
                                     <form method="post" action="{{ url_for('predict') }}" novalidate>
                                         <div class="section-label">
                                             <i class="bi bi-person-vcard"></i>
-                                            Demographics
+                                            Demographics & Obstetric History
                                         </div>
                                         <div class="row g-3">
                                             <div class="col-sm-6">
@@ -60,9 +60,43 @@
                                                 <div class="input-hint">Range: 12–55</div>
                                             </div>
                                             <div class="col-sm-6">
+                                                <label class="form-label" for="height_cm">Height (cm)</label>
+                                                <input class="form-control bmi-input" id="height_cm" name="height_cm" type="number" min="100" max="220" placeholder="e.g. 165" required>
+                                                <div class="input-hint">Range: 100–220</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="weight_kg">Weight (kg)</label>
+                                                <input class="form-control bmi-input" id="weight_kg" name="weight_kg" type="number" step="0.1" min="30" max="200" placeholder="e.g. 68" required>
+                                                <div class="input-hint">Range: 30–200</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="bmi_display">BMI (Auto Calculate)</label>
+                                                <input class="form-control form-control-readonly" id="bmi_display" type="text" placeholder="Calculated automatically" readonly tabindex="-1" aria-readonly="true">
+                                                <div class="input-hint">Computed from height and weight</div>
+                                            </div>
+                                            <div class="col-sm-6">
                                                 <label class="form-label" for="pregnancy_weeks">Pregnancy Weeks</label>
                                                 <input class="form-control" id="pregnancy_weeks" name="pregnancy_weeks" type="number" min="1" max="45" placeholder="e.g. 32" required>
                                                 <div class="input-hint">Range: 1–45</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="gravida">Gravida</label>
+                                                <input class="form-control" id="gravida" name="gravida" type="number" min="1" max="15" placeholder="e.g. 2" required>
+                                                <div class="input-hint">Total pregnancies including current</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label" for="parity">Parity</label>
+                                                <input class="form-control" id="parity" name="parity" type="number" min="0" max="14" placeholder="e.g. 1" required>
+                                                <div class="input-hint">Previous births at or beyond 20 weeks</div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <label class="form-label">Previous C-Section</label>
+                                                <div class="btn-group w-100 choice-group" role="group" aria-label="Previous C-Section">
+                                                    <input type="radio" class="btn-check" name="previous_c_section" id="csection-yes" value="true" required>
+                                                    <label class="btn btn-outline-danger" for="csection-yes">Yes</label>
+                                                    <input type="radio" class="btn-check" name="previous_c_section" id="csection-no" value="false" checked>
+                                                    <label class="btn btn-outline-hz btn-outline-hz-active" for="csection-no">No</label>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -138,4 +172,28 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function updateBmiDisplay() {
+        const heightInput = document.getElementById("height_cm");
+        const weightInput = document.getElementById("weight_kg");
+        const bmiDisplay = document.getElementById("bmi_display");
+        const height = parseFloat(heightInput.value);
+        const weight = parseFloat(weightInput.value);
+
+        if (height > 0 && weight > 0) {
+            const heightMeters = height / 100;
+            const bmi = weight / (heightMeters * heightMeters);
+            bmiDisplay.value = bmi.toFixed(1);
+        } else {
+            bmiDisplay.value = "";
+        }
+    }
+
+    document.querySelectorAll(".bmi-input").forEach((input) => {
+        input.addEventListener("input", updateBmiDisplay);
+    });
+</script>
 {% endblock %}

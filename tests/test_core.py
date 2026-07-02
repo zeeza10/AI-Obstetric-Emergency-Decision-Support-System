@@ -21,7 +21,12 @@ from predict import predict_from_form_data
 
 VALID_FORM_DATA = {
     "age": "28",
+    "height_cm": "165",
+    "weight_kg": "68",
     "pregnancy_weeks": "32",
+    "gravida": "2",
+    "parity": "1",
+    "previous_c_section": "false",
     "heavy_bleeding": "false",
     "severe_abdominal_pain": "false",
     "blood_pressure": "120",
@@ -29,6 +34,27 @@ VALID_FORM_DATA = {
     "fetal_movement": "Normal",
     "consciousness": "Alert",
 }
+
+
+def make_patient(**overrides) -> PatientInfo:
+    """Build a valid patient object for tests with optional overrides."""
+    defaults = {
+        "age": 28,
+        "height_cm": 165,
+        "weight_kg": 68.0,
+        "pregnancy_weeks": 32,
+        "gravida": 2,
+        "parity": 1,
+        "previous_c_section": False,
+        "heavy_bleeding": False,
+        "severe_abdominal_pain": False,
+        "blood_pressure": 120,
+        "body_temperature": 36.8,
+        "fetal_movement": "Normal",
+        "consciousness": "Alert",
+    }
+    defaults.update(overrides)
+    return PatientInfo(**defaults)
 
 
 class ValidationTests(unittest.TestCase):
@@ -39,7 +65,13 @@ class ValidationTests(unittest.TestCase):
         patient = parse_patient_from_form_data(VALID_FORM_DATA)
 
         self.assertEqual(patient.age, 28)
+        self.assertEqual(patient.height_cm, 165)
+        self.assertEqual(patient.weight_kg, 68.0)
+        self.assertEqual(patient.bmi, 25.0)
         self.assertEqual(patient.pregnancy_weeks, 32)
+        self.assertEqual(patient.gravida, 2)
+        self.assertEqual(patient.parity, 1)
+        self.assertFalse(patient.previous_c_section)
         self.assertFalse(patient.heavy_bleeding)
         self.assertFalse(patient.severe_abdominal_pain)
         self.assertEqual(patient.blood_pressure, 120)
@@ -52,7 +84,12 @@ class ValidationTests(unittest.TestCase):
         patient = parse_patient_from_form_data(
             {
                 "age": 30,
+                "height_cm": 160,
+                "weight_kg": 72.5,
                 "pregnancy_weeks": 30,
+                "gravida": 3,
+                "parity": 2,
+                "previous_c_section": True,
                 "heavy_bleeding": True,
                 "severe_abdominal_pain": False,
                 "blood_pressure": 95,
@@ -62,7 +99,9 @@ class ValidationTests(unittest.TestCase):
             }
         )
 
+        self.assertEqual(patient.bmi, 28.3)
         self.assertTrue(patient.heavy_bleeding)
+        self.assertTrue(patient.previous_c_section)
         self.assertFalse(patient.severe_abdominal_pain)
         self.assertEqual(patient.fetal_movement, "Reduced")
         self.assertEqual(patient.consciousness, "Drowsy")
@@ -144,6 +183,17 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(context.exception.field, "consciousness")
         self.assertIn("Alert, Drowsy, Unconscious", str(context.exception))
 
+    def test_parity_must_be_less_than_gravida(self) -> None:
+        """Parity should be clinically consistent with gravida."""
+        payload = dict(VALID_FORM_DATA)
+        payload["gravida"] = "2"
+        payload["parity"] = "2"
+
+        with self.assertRaises(InvalidNumericValueError) as context:
+            parse_patient_from_form_data(payload)
+
+        self.assertEqual(context.exception.field, "parity")
+
     def test_predict_from_form_data_rejects_invalid_input(self) -> None:
         """The prediction entry point should surface validation failures."""
         with self.assertRaises(InvalidNumericValueError):
@@ -155,17 +205,7 @@ class RiskEngineTests(unittest.TestCase):
 
     def test_low_risk_result(self) -> None:
         """A stable patient should receive a low-risk assessment."""
-        patient = PatientInfo(
-            age=28,
-            pregnancy_weeks=32,
-            heavy_bleeding=False,
-            severe_abdominal_pain=False,
-            blood_pressure=120,
-            body_temperature=36.8,
-            fetal_movement="Normal",
-            consciousness="Alert",
-        )
-
+        patient = make_patient()
         result = RuleBasedRiskEngine().assess_risk(patient)
 
         self.assertEqual(result.risk_level, "Low Risk")
@@ -176,7 +216,7 @@ class RiskEngineTests(unittest.TestCase):
 
     def test_critical_risk_result(self) -> None:
         """Severe symptoms should produce a critical-risk assessment."""
-        patient = PatientInfo(
+        patient = make_patient(
             age=30,
             pregnancy_weeks=30,
             heavy_bleeding=True,
@@ -197,16 +237,7 @@ class RiskEngineTests(unittest.TestCase):
 
     def test_validation_rejects_invalid_patient(self) -> None:
         """Invalid data should be rejected by the validator."""
-        patient = PatientInfo(
-            age=0,
-            pregnancy_weeks=32,
-            heavy_bleeding=False,
-            severe_abdominal_pain=False,
-            blood_pressure=120,
-            body_temperature=36.8,
-            fetal_movement="Normal",
-            consciousness="Alert",
-        )
+        patient = make_patient(age=0)
 
         with self.assertRaises(InvalidNumericValueError) as context:
             validate_patient_information(patient)
@@ -216,16 +247,7 @@ class RiskEngineTests(unittest.TestCase):
 
     def test_validation_rejects_missing_information(self) -> None:
         """Missing or empty values should raise a dedicated exception."""
-        patient = PatientInfo(
-            age=28,
-            pregnancy_weeks=32,
-            heavy_bleeding=False,
-            severe_abdominal_pain=False,
-            blood_pressure=120,
-            body_temperature=36.8,
-            fetal_movement="",
-            consciousness="Alert",
-        )
+        patient = make_patient(fetal_movement="")
 
         with self.assertRaises(MissingValueError) as context:
             validate_patient_information(patient)
@@ -237,22 +259,13 @@ class RiskEngineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             missing_path = os.path.join(temp_dir, "missing_model.pkl")
             engine = ModelRiskEngine(model_path=missing_path)
-            patient = PatientInfo(
-                age=28,
-                pregnancy_weeks=32,
-                heavy_bleeding=False,
-                severe_abdominal_pain=False,
-                blood_pressure=120,
-                body_temperature=36.8,
-                fetal_movement="Normal",
-                consciousness="Alert",
-            )
+            patient = make_patient()
             result = engine.assess_risk(patient)
             self.assertIn(result.risk_level, {"Low Risk", "Moderate Risk", "High Risk", "Critical Risk"})
 
     def test_generate_shap_explanation_creates_visuals(self) -> None:
         """An assessment should produce SHAP-based explanation artifacts for clinicians."""
-        patient = PatientInfo(
+        patient = make_patient(
             age=30,
             pregnancy_weeks=30,
             heavy_bleeding=True,

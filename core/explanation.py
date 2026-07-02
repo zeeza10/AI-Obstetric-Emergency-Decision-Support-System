@@ -21,7 +21,13 @@ def _build_feature_vector(patient: PatientInfo) -> List[float]:
     consciousness_mapping = {"Alert": 0.0, "Drowsy": 0.5, "Unconscious": 1.0}
     return [
         float(patient.age),
+        float(patient.height_cm),
+        float(patient.weight_kg),
+        patient.bmi,
         float(patient.pregnancy_weeks),
+        float(patient.gravida),
+        float(patient.parity),
+        1.0 if patient.previous_c_section else 0.0,
         1.0 if patient.heavy_bleeding else 0.0,
         1.0 if patient.severe_abdominal_pain else 0.0,
         float(patient.blood_pressure),
@@ -34,7 +40,13 @@ def _build_feature_vector(patient: PatientInfo) -> List[float]:
 def _build_feature_names() -> List[str]:
     return [
         "age",
+        "height_cm",
+        "weight_kg",
+        "bmi",
         "pregnancy_weeks",
+        "gravida",
+        "parity",
+        "previous_c_section",
         "heavy_bleeding",
         "severe_abdominal_pain",
         "blood_pressure",
@@ -50,9 +62,15 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
     values = _build_feature_vector(patient)
     shap_values: List[float] = []
     for index, value in enumerate(values):
-        if feature_names[index] in {"heavy_bleeding", "severe_abdominal_pain", "fetal_movement", "consciousness"}:
+        if feature_names[index] in {
+            "heavy_bleeding",
+            "severe_abdominal_pain",
+            "previous_c_section",
+            "fetal_movement",
+            "consciousness",
+        }:
             shap_values.append(round(float(value) * 0.35, 3))
-        elif feature_names[index] in {"blood_pressure", "body_temperature"}:
+        elif feature_names[index] in {"blood_pressure", "body_temperature", "bmi"}:
             shap_values.append(round(float(value) / 100.0 * 0.2, 3))
         else:
             shap_values.append(round(float(value) / 40.0 * 0.15, 3))
@@ -62,13 +80,13 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
 def _render_bar_chart(values: List[float], labels: List[str], title: str, horizontal: bool = False) -> str:
     """Create a simple SVG bar chart for the explanation view."""
     width = 700
-    height = 360
-    margin_left = 140
+    row_height = 22
+    margin_left = 160
     margin_top = 40
-    bar_width = 28
+    bar_width = 24
     chart_height = 240
+    height = margin_top + (len(labels) * row_height) + 24 if horizontal else 360
     max_value = max(abs(value) for value in values) or 1.0
-    chart_width = (len(labels) * (bar_width + 20)) - 20
 
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
@@ -79,7 +97,7 @@ def _render_bar_chart(values: List[float], labels: List[str], title: str, horizo
     for index, (label, value) in enumerate(zip(labels, values)):
         if horizontal:
             x = margin_left
-            y = margin_top + index * 24
+            y = margin_top + index * row_height
             bar_height = 14
             bar_length = int((abs(value) / max_value) * 180)
             bar_color = "#2563eb" if value >= 0 else "#dc2626"

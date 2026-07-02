@@ -54,6 +54,21 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 1
             reasons.append("Maternal age is outside the standard low-risk range.")
 
+        if patient.bmi >= 40:
+            score += 2
+            reasons.append("BMI indicates severe obesity, increasing obstetric complication risk.")
+        elif patient.bmi >= 30:
+            score += 1
+            reasons.append("BMI indicates obesity, which may increase complication risk.")
+
+        if patient.gravida >= 5:
+            score += 1
+            reasons.append("Grand multiparity may increase the risk of obstetric complications.")
+
+        if patient.previous_c_section:
+            score += 1
+            reasons.append("Previous cesarean section increases risk in certain obstetric emergencies.")
+
         if patient.pregnancy_weeks < 20 or patient.pregnancy_weeks > 42:
             score += 1
             reasons.append("Gestational age is outside the expected low-risk range.")
@@ -141,7 +156,13 @@ class SimplePersistedModel:
     def __init__(self) -> None:
         self.feature_names = [
             "age",
+            "height_cm",
+            "weight_kg",
+            "bmi",
             "pregnancy_weeks",
+            "gravida",
+            "parity",
+            "previous_c_section",
             "heavy_bleeding",
             "severe_abdominal_pain",
             "blood_pressure",
@@ -155,7 +176,13 @@ class SimplePersistedModel:
         consciousness_mapping = {"Alert": 0.0, "Drowsy": 0.5, "Unconscious": 1.0}
         return [
             float(patient.age),
+            float(patient.height_cm),
+            float(patient.weight_kg),
+            patient.bmi,
             float(patient.pregnancy_weeks),
+            float(patient.gravida),
+            float(patient.parity),
+            1.0 if patient.previous_c_section else 0.0,
             1.0 if patient.heavy_bleeding else 0.0,
             1.0 if patient.severe_abdominal_pain else 0.0,
             float(patient.blood_pressure),
@@ -171,17 +198,26 @@ class SimplePersistedModel:
             raise ModelPredictionError("Feature vector length does not match the expected model shape.")
 
         age = vector[0]
-        weeks = vector[1]
-        bleeding = vector[2]
-        pain = vector[3]
-        bp = vector[4]
-        temp = vector[5]
-        fetal = vector[6]
-        consciousness = vector[7]
+        height_cm = vector[1]
+        weight_kg = vector[2]
+        bmi = vector[3]
+        weeks = vector[4]
+        gravida = vector[5]
+        parity = vector[6]
+        previous_c_section = vector[7]
+        bleeding = vector[8]
+        pain = vector[9]
+        bp = vector[10]
+        temp = vector[11]
+        fetal = vector[12]
+        consciousness = vector[13]
 
         severity_score = 0.0
         severity_score += 0.02 * max(0.0, age - 25.0)
+        severity_score += 0.01 * max(0.0, bmi - 25.0)
         severity_score += 0.01 * max(0.0, weeks - 28.0)
+        severity_score += 0.03 * max(0.0, gravida - 2.0)
+        severity_score += 0.08 * previous_c_section
         severity_score += 0.35 * bleeding
         severity_score += 0.25 * pain
         severity_score += 0.01 * max(0.0, 120.0 - bp)
@@ -245,16 +281,7 @@ class ModelRiskEngine(RiskEngine):
     def assess_risk(self, patient: PatientInfo) -> AssessmentResult:
         """Use the persisted model to generate a risk assessment."""
         try:
-            features = self.model._encode_patient(patient) if hasattr(self.model, "_encode_patient") else [
-                float(patient.age),
-                float(patient.pregnancy_weeks),
-                1.0 if patient.heavy_bleeding else 0.0,
-                1.0 if patient.severe_abdominal_pain else 0.0,
-                float(patient.blood_pressure),
-                float(patient.body_temperature),
-                0.0 if patient.fetal_movement == "Normal" else 0.5 if patient.fetal_movement == "Reduced" else 1.0,
-                0.0 if patient.consciousness == "Alert" else 0.5 if patient.consciousness == "Drowsy" else 1.0,
-            ]
+            features = self.model._encode_patient(patient) if hasattr(self.model, "_encode_patient") else SimplePersistedModel()._encode_patient(patient)
             probabilities = self.model.predict_proba(features)[0]
             predicted_class = max(range(len(probabilities)), key=lambda index: probabilities[index])
             confidence_score = round(float(probabilities[predicted_class]), 4)

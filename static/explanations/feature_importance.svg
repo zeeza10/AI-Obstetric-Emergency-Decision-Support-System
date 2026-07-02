@@ -1,28 +1,46 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="700" height="360" viewBox="0 0 700 360">
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="372" viewBox="0 0 700 372">
 <rect width="100%" height="100%" fill="white"/>
 <text x="350.0" y="24" text-anchor="middle" font-size="18" font-family="Arial" font-weight="bold">Feature Importance</text>
-<rect x="140" y="40" width="38" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="51" text-anchor="end" font-size="12" font-family="Arial">age</text>
-<text x="186" y="51" font-size="12" font-family="Arial">+0.07</text>
-<rect x="140" y="64" width="61" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="75" text-anchor="end" font-size="12" font-family="Arial">pregnancy_weeks</text>
-<text x="209" y="75" font-size="12" font-family="Arial">+0.12</text>
-<rect x="140" y="88" width="180" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="99" text-anchor="end" font-size="12" font-family="Arial">heavy_bleeding</text>
-<text x="328" y="99" font-size="12" font-family="Arial">+0.35</text>
-<rect x="140" y="112" width="0" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="123" text-anchor="end" font-size="12" font-family="Arial">severe_abdominal_pain</text>
-<text x="148" y="123" font-size="12" font-family="Arial">+0.00</text>
-<rect x="140" y="136" width="144" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="147" text-anchor="end" font-size="12" font-family="Arial">blood_pressure</text>
-<text x="292" y="147" font-size="12" font-family="Arial">+0.28</text>
-<rect x="140" y="160" width="37" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="171" text-anchor="end" font-size="12" font-family="Arial">body_temperature</text>
-<text x="185" y="171" font-size="12" font-family="Arial">+0.07</text>
-<rect x="140" y="184" width="0" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="195" text-anchor="end" font-size="12" font-family="Arial">fetal_movement</text>
-<text x="148" y="195" font-size="12" font-family="Arial">+0.00</text>
-<rect x="140" y="208" width="90" height="14" fill="#2563eb" rx="4"/>
-<text x="132" y="219" text-anchor="end" font-size="12" font-family="Arial">consciousness</text>
-<text x="238" y="219" font-size="12" font-family="Arial">+0.17</text>
+<rect x="160" y="40" width="32" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="51" text-anchor="end" font-size="12" font-family="Arial">age</text>
+<text x="200" y="51" font-size="12" font-family="Arial">+0.11</text>
+<rect x="160" y="62" width="180" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="73" text-anchor="end" font-size="12" font-family="Arial">height_cm</text>
+<text x="348" y="73" font-size="12" font-family="Arial">+0.62</text>
+<rect x="160" y="84" width="74" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="95" text-anchor="end" font-size="12" font-family="Arial">weight_kg</text>
+<text x="242" y="95" font-size="12" font-family="Arial">+0.26</text>
+<rect x="160" y="106" width="14" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="117" text-anchor="end" font-size="12" font-family="Arial">bmi</text>
+<text x="182" y="117" font-size="12" font-family="Arial">+0.05</text>
+<rect x="160" y="128" width="32" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="139" text-anchor="end" font-size="12" font-family="Arial">pregnancy_weeks</text>
+<text x="200" y="139" font-size="12" font-family="Arial">+0.11</text>
+<rect x="160" y="150" width="2" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="161" text-anchor="end" font-size="12" font-family="Arial">gravida</text>
+<text x="170" y="161" font-size="12" font-family="Arial">+0.01</text>
+<rect x="160" y="172" width="1" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="183" text-anchor="end" font-size="12" font-family="Arial">parity</text>
+<text x="169" y="183" font-size="12" font-family="Arial">+0.00</text>
+<rect x="160" y="194" width="0" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="205" text-anchor="end" font-size="12" font-family="Arial">previous_c_section</text>
+<text x="168" y="205" font-size="12" font-family="Arial">+0.00</text>
+<rect x="160" y="216" width="101" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="227" text-anchor="end" font-size="12" font-family="Arial">heavy_bleeding</text>
+<text x="269" y="227" font-size="12" font-family="Arial">+0.35</text>
+<rect x="160" y="238" width="101" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="249" text-anchor="end" font-size="12" font-family="Arial">severe_abdominal_pain</text>
+<text x="269" y="249" font-size="12" font-family="Arial">+0.35</text>
+<rect x="160" y="260" width="55" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="271" text-anchor="end" font-size="12" font-family="Arial">blood_pressure</text>
+<text x="223" y="271" font-size="12" font-family="Arial">+0.19</text>
+<rect x="160" y="282" width="22" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="293" text-anchor="end" font-size="12" font-family="Arial">body_temperature</text>
+<text x="190" y="293" font-size="12" font-family="Arial">+0.08</text>
+<rect x="160" y="304" width="50" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="315" text-anchor="end" font-size="12" font-family="Arial">fetal_movement</text>
+<text x="218" y="315" font-size="12" font-family="Arial">+0.17</text>
+<rect x="160" y="326" width="50" height="14" fill="#2563eb" rx="4"/>
+<text x="152" y="337" text-anchor="end" font-size="12" font-family="Arial">consciousness</text>
+<text x="218" y="337" font-size="12" font-family="Arial">+0.17</text>
 </svg>

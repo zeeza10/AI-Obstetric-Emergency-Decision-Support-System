@@ -37,7 +37,12 @@ __all__ = [
 
 def create_patient(
     age: int,
+    height_cm: int,
+    weight_kg: float,
     pregnancy_weeks: int,
+    gravida: int,
+    parity: int,
+    previous_c_section: bool,
     heavy_bleeding: bool,
     severe_abdominal_pain: bool,
     blood_pressure: int,
@@ -48,7 +53,12 @@ def create_patient(
     """Create a PatientInfo instance from explicit clinical inputs."""
     return PatientInfo(
         age=age,
+        height_cm=height_cm,
+        weight_kg=weight_kg,
         pregnancy_weeks=pregnancy_weeks,
+        gravida=gravida,
+        parity=parity,
+        previous_c_section=previous_c_section,
         heavy_bleeding=heavy_bleeding,
         severe_abdominal_pain=severe_abdominal_pain,
         blood_pressure=blood_pressure,
@@ -87,7 +97,12 @@ def predict_from_form_data(
 
 def predict_risk(
     age: int,
+    height_cm: int,
+    weight_kg: float,
     pregnancy_weeks: int,
+    gravida: int,
+    parity: int,
+    previous_c_section: bool,
     heavy_bleeding: bool,
     severe_abdominal_pain: bool,
     blood_pressure: int,
@@ -102,8 +117,18 @@ def predict_risk(
     ----------
     age: int
         Patient age in years.
+    height_cm: int
+        Patient height in centimeters.
+    weight_kg: float
+        Patient weight in kilograms.
     pregnancy_weeks: int
         Gestational age in weeks.
+    gravida: int
+        Total number of pregnancies including the current one.
+    parity: int
+        Number of previous births at or beyond 20 weeks.
+    previous_c_section: bool
+        Whether the patient has had a previous cesarean section.
     heavy_bleeding: bool
         Whether the patient reports heavy bleeding.
     severe_abdominal_pain: bool
@@ -126,7 +151,12 @@ def predict_risk(
     """
     patient = create_patient(
         age=age,
+        height_cm=height_cm,
+        weight_kg=weight_kg,
         pregnancy_weeks=pregnancy_weeks,
+        gravida=gravida,
+        parity=parity,
+        previous_c_section=previous_c_section,
         heavy_bleeding=heavy_bleeding,
         severe_abdominal_pain=severe_abdominal_pain,
         blood_pressure=blood_pressure,
