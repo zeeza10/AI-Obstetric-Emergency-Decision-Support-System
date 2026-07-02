@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from flask import Flask, jsonify, render_template, request
+from werkzeug.exceptions import HTTPException
 
 from config import get_config
 from core import ValidationError
@@ -113,6 +114,29 @@ def api_predict():
 def health() -> dict[str, str]:
     """Simple health check endpoint."""
     return {"status": "ok", "version": config.version, "engine": config.engine_type}
+
+
+def _wants_json_response() -> bool:
+    """Return True when the client expects a JSON error payload."""
+    return request.path.startswith("/api") or request.accept_mimetypes.best == "application/json"
+
+
+@app.errorhandler(404)
+def not_found(error: HTTPException):
+    """Render a professional 404 page or JSON error for API clients."""
+    logger.warning("404 Not Found: %s", request.path)
+    if _wants_json_response():
+        return jsonify({"status": "error", "message": "The requested resource was not found."}), 404
+    return render_template("404.html"), 404
+
+
+@app.errorhandler(500)
+def internal_error(error: HTTPException):
+    """Render a professional 500 page or JSON error for API clients."""
+    logger.exception("500 Internal Server Error: %s", request.path)
+    if _wants_json_response():
+        return jsonify({"status": "error", "message": "An unexpected server error occurred."}), 500
+    return render_template("500.html"), 500
 
 
 if __name__ == "__main__":
