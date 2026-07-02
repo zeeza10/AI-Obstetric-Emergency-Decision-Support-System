@@ -2,6 +2,17 @@ body {
     background: linear-gradient(135deg, #f2f7ff 0%, #eef6ff 100%);
     color: #18324a;
     min-height: 100vh;
+    margin: 0;
+}
+
+.page-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-wrap {
+    flex: 1;
 }
 
 .hero-card {
@@ -24,4 +35,21 @@ body {
 
 .card {
     border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.footer-bar {
+    background: linear-gradient(135deg, #0f3b6e 0%, #1d4ed8 100%);
+    color: #ffffff;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.08);
+}
+
+.footer-bar .footer-meta {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+@media (max-width: 767.98px) {
+    .footer-bar .text-md-end {
+        text-align: left !important;
+    }
 }

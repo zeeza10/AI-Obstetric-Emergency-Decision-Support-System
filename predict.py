@@ -8,7 +8,7 @@ backends.
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Mapping, Optional, Tuple
 
 from core import (
     AssessmentResult,
@@ -19,7 +19,39 @@ from core import (
     validate_patient_information,
 )
 
-__all__ = ["PatientInfo", "AssessmentResult", "RiskEngine", "RuleBasedRiskEngine", "ModelRiskEngine", "predict_risk"]
+__all__ = [
+    "PatientInfo",
+    "AssessmentResult",
+    "RiskEngine",
+    "RuleBasedRiskEngine",
+    "ModelRiskEngine",
+    "create_patient",
+    "predict_from_form_data",
+    "predict_risk",
+]
+
+
+def create_patient(
+    age: int,
+    pregnancy_weeks: int,
+    heavy_bleeding: bool,
+    severe_abdominal_pain: bool,
+    blood_pressure: int,
+    body_temperature: float,
+    fetal_movement: str,
+    consciousness: str,
+) -> PatientInfo:
+    """Create a PatientInfo instance from explicit clinical inputs."""
+    return PatientInfo(
+        age=age,
+        pregnancy_weeks=pregnancy_weeks,
+        heavy_bleeding=heavy_bleeding,
+        severe_abdominal_pain=severe_abdominal_pain,
+        blood_pressure=blood_pressure,
+        body_temperature=body_temperature,
+        fetal_movement=fetal_movement,
+        consciousness=consciousness,
+    )
 
 
 def predict_from_patient(patient: PatientInfo, engine: Optional[RiskEngine] = None) -> AssessmentResult:
@@ -27,6 +59,34 @@ def predict_from_patient(patient: PatientInfo, engine: Optional[RiskEngine] = No
     validate_patient_information(patient)
     active_engine = engine or ModelRiskEngine()
     return active_engine.assess_risk(patient)
+
+
+def predict_from_form_data(
+    form_data: Mapping[str, object],
+    engine: Optional[RiskEngine] = None,
+) -> Tuple[AssessmentResult, PatientInfo]:
+    """Assess risk from a request-like form mapping while keeping parsing centralized."""
+    age = int(str(form_data.get("age", "0")))
+    pregnancy_weeks = int(str(form_data.get("pregnancy_weeks", "0")))
+    heavy_bleeding = str(form_data.get("heavy_bleeding", "false")) == "true"
+    severe_abdominal_pain = str(form_data.get("severe_abdominal_pain", "false")) == "true"
+    blood_pressure = int(str(form_data.get("blood_pressure", "0")))
+    body_temperature = float(str(form_data.get("body_temperature", "0")))
+    fetal_movement = str(form_data.get("fetal_movement", "Normal"))
+    consciousness = str(form_data.get("consciousness", "Alert"))
+
+    patient = create_patient(
+        age=age,
+        pregnancy_weeks=pregnancy_weeks,
+        heavy_bleeding=heavy_bleeding,
+        severe_abdominal_pain=severe_abdominal_pain,
+        blood_pressure=blood_pressure,
+        body_temperature=body_temperature,
+        fetal_movement=fetal_movement,
+        consciousness=consciousness,
+    )
+    result = predict_from_patient(patient, engine=engine)
+    return result, patient
 
 
 def predict_risk(
@@ -68,7 +128,7 @@ def predict_risk(
     AssessmentResult
         Structured risk assessment output.
     """
-    patient = PatientInfo(
+    patient = create_patient(
         age=age,
         pregnancy_weeks=pregnancy_weeks,
         heavy_bleeding=heavy_bleeding,

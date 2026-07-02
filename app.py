@@ -11,8 +11,7 @@ from core import (
     MissingValueError,
 )
 from core.explanation import generate_shap_explanation
-from core.patient import PatientInfo
-from predict import predict_risk
+from predict import predict_from_form_data
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -27,35 +26,7 @@ def index() -> str:
 def predict() -> str:
     """Process the patient form and render the assessment result."""
     try:
-        age = int(request.form.get("age", "0"))
-        pregnancy_weeks = int(request.form.get("pregnancy_weeks", "0"))
-        heavy_bleeding = request.form.get("heavy_bleeding") == "true"
-        severe_abdominal_pain = request.form.get("severe_abdominal_pain") == "true"
-        blood_pressure = int(request.form.get("blood_pressure", "0"))
-        body_temperature = float(request.form.get("body_temperature", "0"))
-        fetal_movement = request.form.get("fetal_movement", "Normal")
-        consciousness = request.form.get("consciousness", "Alert")
-
-        result = predict_risk(
-            age=age,
-            pregnancy_weeks=pregnancy_weeks,
-            heavy_bleeding=heavy_bleeding,
-            severe_abdominal_pain=severe_abdominal_pain,
-            blood_pressure=blood_pressure,
-            body_temperature=body_temperature,
-            fetal_movement=fetal_movement,
-            consciousness=consciousness,
-        )
-        patient = PatientInfo(
-            age=age,
-            pregnancy_weeks=pregnancy_weeks,
-            heavy_bleeding=heavy_bleeding,
-            severe_abdominal_pain=severe_abdominal_pain,
-            blood_pressure=blood_pressure,
-            body_temperature=body_temperature,
-            fetal_movement=fetal_movement,
-            consciousness=consciousness,
-        )
+        result, patient = predict_from_form_data(request.form)
         explanation = generate_shap_explanation(patient, result)
         risk_class = result.risk_level.lower().replace(" ", "-")
         return render_template(

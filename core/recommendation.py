@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
+from typing import TYPE_CHECKING, Dict, Tuple
 
-from .risk_engine import AssessmentResult
+if TYPE_CHECKING:
+    from .risk_engine import AssessmentResult
 
 
 def get_clinical_guidance(risk_level: str) -> Tuple[str, str]:
