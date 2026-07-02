@@ -14,6 +14,7 @@ from core import (
     RuleBasedRiskEngine,
     validate_patient_information,
 )
+from core.explanation import generate_shap_explanation
 
 
 class RiskEngineTests(unittest.TestCase):
@@ -125,6 +126,26 @@ class RiskEngineTests(unittest.TestCase):
             )
             result = engine.assess_risk(patient)
             self.assertIn(result.risk_level, {"Low Risk", "Moderate Risk", "High Risk", "Critical Risk"})
+
+    def test_generate_shap_explanation_creates_visuals(self) -> None:
+        """An assessment should produce SHAP-based explanation artifacts for clinicians."""
+        patient = PatientInfo(
+            age=30,
+            pregnancy_weeks=30,
+            heavy_bleeding=True,
+            severe_abdominal_pain=True,
+            blood_pressure=95,
+            body_temperature=38.1,
+            fetal_movement="Reduced",
+            consciousness="Drowsy",
+        )
+        result = ModelRiskEngine().assess_risk(patient)
+        explanation = generate_shap_explanation(patient, result)
+        self.assertTrue(explanation["feature_importance_path"].endswith(".svg"))
+        self.assertTrue(explanation["waterfall_path"].endswith(".svg"))
+        self.assertTrue(os.path.exists(explanation["feature_importance_path"]))
+        self.assertTrue(os.path.exists(explanation["waterfall_path"]))
+        self.assertGreater(len(explanation["feature_names"]), 0)
 
 
 if __name__ == "__main__":

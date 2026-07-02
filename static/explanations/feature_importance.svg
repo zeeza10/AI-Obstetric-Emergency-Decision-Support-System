@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="360" viewBox="0 0 700 360">
+<rect width="100%" height="100%" fill="white"/>
+<text x="350.0" y="24" text-anchor="middle" font-size="18" font-family="Arial" font-weight="bold">Feature Importance</text>
+<rect x="140" y="40" width="61" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="51" text-anchor="end" font-size="12" font-family="Arial">age</text>
+<text x="209" y="51" font-size="12" font-family="Arial">+0.12</text>
+<rect x="140" y="64" width="7" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="75" text-anchor="end" font-size="12" font-family="Arial">pregnancy_weeks</text>
+<text x="155" y="75" font-size="12" font-family="Arial">+0.01</text>
+<rect x="140" y="88" width="180" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="99" text-anchor="end" font-size="12" font-family="Arial">heavy_bleeding</text>
+<text x="328" y="99" font-size="12" font-family="Arial">+0.35</text>
+<rect x="140" y="112" width="180" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="123" text-anchor="end" font-size="12" font-family="Arial">severe_abdominal_pain</text>
+<text x="328" y="123" font-size="12" font-family="Arial">+0.35</text>
+<rect x="140" y="136" width="164" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="147" text-anchor="end" font-size="12" font-family="Arial">blood_pressure</text>
+<text x="312" y="147" font-size="12" font-family="Arial">+0.32</text>
+<rect x="140" y="160" width="104" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="171" text-anchor="end" font-size="12" font-family="Arial">body_temperature</text>
+<text x="252" y="171" font-size="12" font-family="Arial">+0.20</text>
+<rect x="140" y="184" width="0" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="195" text-anchor="end" font-size="12" font-family="Arial">fetal_movement</text>
+<text x="148" y="195" font-size="12" font-family="Arial">+0.00</text>
+<rect x="140" y="208" width="0" height="14" fill="#2563eb" rx="4"/>
+<text x="132" y="219" text-anchor="end" font-size="12" font-family="Arial">consciousness</text>
+<text x="148" y="219" font-size="12" font-family="Arial">+0.00</text>
+</svg>
