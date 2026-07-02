@@ -47,6 +47,13 @@ def _build_feature_vector(patient: PatientInfo) -> List[float]:
         float(patient.body_temperature),
         float(patient.spo2),
         patient.blood_sugar,
+        1.0 if patient.hypertension else 0.0,
+        1.0 if patient.diabetes else 0.0,
+        1.0 if patient.anemia else 0.0,
+        1.0 if patient.heart_disease else 0.0,
+        1.0 if patient.multiple_pregnancy else 0.0,
+        1.0 if patient.previous_preeclampsia else 0.0,
+        1.0 if patient.previous_hemorrhage else 0.0,
     ]
 
 
@@ -79,6 +86,13 @@ def _build_feature_names() -> List[str]:
         "body_temperature",
         "spo2",
         "blood_sugar",
+        "hypertension",
+        "diabetes",
+        "anemia",
+        "heart_disease",
+        "multiple_pregnancy",
+        "previous_preeclampsia",
+        "previous_hemorrhage",
     ]
 
 
@@ -99,6 +113,13 @@ def _compute_shap_values(patient: PatientInfo) -> List[float]:
         "vomiting",
         "fetal_movement",
         "bleeding_severity",
+        "hypertension",
+        "diabetes",
+        "anemia",
+        "heart_disease",
+        "multiple_pregnancy",
+        "previous_preeclampsia",
+        "previous_hemorrhage",
     }
     vital_features = {
         "systolic_bp",

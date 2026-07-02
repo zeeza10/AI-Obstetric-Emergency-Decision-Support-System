@@ -43,6 +43,13 @@ class PatientInfo:
     body_temperature: float
     spo2: int
     blood_sugar: float
+    hypertension: bool = False
+    diabetes: bool = False
+    anemia: bool = False
+    heart_disease: bool = False
+    multiple_pregnancy: bool = False
+    previous_preeclampsia: bool = False
+    previous_hemorrhage: bool = False
 
     @property
     def bmi(self) -> float:
@@ -79,4 +86,11 @@ class PatientInfo:
             "Body Temperature": f"{self.body_temperature:.1f} °C",
             "SpO₂": f"{self.spo2}%",
             "Blood Sugar": f"{self.blood_sugar:.1f} mg/dL",
+            "Hypertension": "Yes" if self.hypertension else "No",
+            "Diabetes": "Yes" if self.diabetes else "No",
+            "Anemia": "Yes" if self.anemia else "No",
+            "Heart Disease": "Yes" if self.heart_disease else "No",
+            "Multiple Pregnancy": "Yes" if self.multiple_pregnancy else "No",
+            "Previous Preeclampsia": "Yes" if self.previous_preeclampsia else "No",
+            "Previous Hemorrhage": "Yes" if self.previous_hemorrhage else "No",
         }

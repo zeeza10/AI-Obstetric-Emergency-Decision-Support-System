@@ -69,6 +69,34 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 1
             reasons.append("Previous cesarean section increases risk in certain obstetric emergencies.")
 
+        if patient.hypertension:
+            score += 2
+            reasons.append("Known hypertension increases the risk of hypertensive obstetric complications.")
+
+        if patient.diabetes:
+            score += 1
+            reasons.append("Diabetes increases the risk of maternal and fetal complications.")
+
+        if patient.anemia:
+            score += 1
+            reasons.append("Anemia may reduce physiologic reserve during pregnancy or bleeding.")
+
+        if patient.heart_disease:
+            score += 2
+            reasons.append("Heart disease increases the risk of maternal decompensation.")
+
+        if patient.multiple_pregnancy:
+            score += 1
+            reasons.append("Multiple pregnancy increases obstetric complication risk.")
+
+        if patient.previous_preeclampsia:
+            score += 2
+            reasons.append("Previous preeclampsia increases recurrence and hypertensive emergency risk.")
+
+        if patient.previous_hemorrhage:
+            score += 2
+            reasons.append("Previous hemorrhage increases concern for recurrent bleeding complications.")
+
         if patient.pregnancy_weeks < 20 or patient.pregnancy_weeks > 42:
             score += 1
             reasons.append("Gestational age is outside the expected low-risk range.")
@@ -105,6 +133,10 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 2
             reasons.append("Blood pressure is outside the expected range.")
 
+        if patient.hypertension and (patient.systolic_bp >= 140 or patient.diastolic_bp >= 90):
+            score += 1
+            reasons.append("Known hypertension with elevated blood pressure requires urgent review.")
+
         if patient.heart_rate < 60 or patient.heart_rate > 100:
             score += 1
             reasons.append("Heart rate is outside the expected range.")
@@ -134,6 +166,10 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 1
             reasons.append("Blood sugar is outside the expected range.")
 
+        if patient.diabetes and (patient.blood_sugar < 70 or patient.blood_sugar > 180):
+            score += 1
+            reasons.append("Diabetes with abnormal blood sugar increases immediate clinical concern.")
+
         if patient.fetal_movement == "Reduced":
             score += 2
             reasons.append("Fetal movement is reduced and needs urgent review.")
@@ -156,6 +192,10 @@ class RuleBasedRiskEngine(RiskEngine):
             score += 1
             reasons.append("Neurological visual symptoms require clinical review.")
 
+        if patient.previous_preeclampsia and (patient.headache or patient.blurred_vision or patient.hypertension):
+            score += 1
+            reasons.append("Preeclampsia history with current warning signs increases recurrence concern.")
+
         if patient.difficulty_breathing:
             score += 2
             reasons.append("Difficulty breathing may indicate respiratory compromise.")
@@ -175,6 +215,14 @@ class RuleBasedRiskEngine(RiskEngine):
         ):
             score += 2
             reasons.append("Bleeding with abdominal pain and low blood pressure suggests instability.")
+
+        if patient.previous_hemorrhage and patient.heavy_vaginal_bleeding:
+            score += 1
+            reasons.append("Current bleeding with previous hemorrhage history raises hemorrhage risk.")
+
+        if patient.heart_disease and (patient.chest_pain or patient.difficulty_breathing or patient.spo2 < 95):
+            score += 2
+            reasons.append("Heart disease with cardiopulmonary symptoms may indicate acute decompensation.")
 
         risk_level, explanation, action = self._classify(score, patient)
         return AssessmentResult(
@@ -247,6 +295,13 @@ class SimplePersistedModel:
             "body_temperature",
             "spo2",
             "blood_sugar",
+            "hypertension",
+            "diabetes",
+            "anemia",
+            "heart_disease",
+            "multiple_pregnancy",
+            "previous_preeclampsia",
+            "previous_hemorrhage",
         ]
 
     def _encode_patient(self, patient: PatientInfo) -> list[float]:
@@ -280,6 +335,13 @@ class SimplePersistedModel:
             float(patient.body_temperature),
             float(patient.spo2),
             patient.blood_sugar,
+            1.0 if patient.hypertension else 0.0,
+            1.0 if patient.diabetes else 0.0,
+            1.0 if patient.anemia else 0.0,
+            1.0 if patient.heart_disease else 0.0,
+            1.0 if patient.multiple_pregnancy else 0.0,
+            1.0 if patient.previous_preeclampsia else 0.0,
+            1.0 if patient.previous_hemorrhage else 0.0,
         ]
 
     def predict_proba(self, features: Sequence[float]) -> list[list[float]]:
@@ -315,6 +377,13 @@ class SimplePersistedModel:
         temp = vector[24]
         spo2 = vector[25]
         blood_sugar = vector[26]
+        hypertension = vector[27]
+        diabetes = vector[28]
+        anemia = vector[29]
+        heart_disease = vector[30]
+        multiple_pregnancy = vector[31]
+        previous_preeclampsia = vector[32]
+        previous_hemorrhage = vector[33]
 
         severity_score = 0.0
         severity_score += 0.02 * max(0.0, age - 25.0)
@@ -341,6 +410,18 @@ class SimplePersistedModel:
         severity_score += 0.12 * max(0.0, temp - 37.0)
         severity_score += 0.01 * max(0.0, 95.0 - spo2)
         severity_score += 0.004 * max(0.0, abs(blood_sugar - 100.0) - 20.0)
+        severity_score += 0.16 * hypertension
+        severity_score += 0.08 * diabetes
+        severity_score += 0.08 * anemia
+        severity_score += 0.16 * heart_disease
+        severity_score += 0.08 * multiple_pregnancy
+        severity_score += 0.16 * previous_preeclampsia
+        severity_score += 0.16 * previous_hemorrhage
+        severity_score += 0.08 * hypertension * (1.0 if systolic_bp >= 140.0 or diastolic_bp >= 90.0 else 0.0)
+        severity_score += 0.08 * diabetes * (1.0 if blood_sugar < 70.0 or blood_sugar > 180.0 else 0.0)
+        severity_score += 0.12 * previous_hemorrhage * heavy_bleeding
+        severity_score += 0.12 * previous_preeclampsia * (headache + blurred_vision + hypertension)
+        severity_score += 0.12 * heart_disease * (chest_pain + difficulty_breathing)
 
         if severity_score >= 1.4:
             class_index = 3

@@ -62,6 +62,13 @@ def create_patient(
     body_temperature: float,
     spo2: int,
     blood_sugar: float,
+    hypertension: bool = False,
+    diabetes: bool = False,
+    anemia: bool = False,
+    heart_disease: bool = False,
+    multiple_pregnancy: bool = False,
+    previous_preeclampsia: bool = False,
+    previous_hemorrhage: bool = False,
 ) -> PatientInfo:
     """Create a PatientInfo instance from explicit clinical inputs."""
     return PatientInfo(
@@ -91,6 +98,13 @@ def create_patient(
         body_temperature=body_temperature,
         spo2=spo2,
         blood_sugar=blood_sugar,
+        hypertension=hypertension,
+        diabetes=diabetes,
+        anemia=anemia,
+        heart_disease=heart_disease,
+        multiple_pregnancy=multiple_pregnancy,
+        previous_preeclampsia=previous_preeclampsia,
+        previous_hemorrhage=previous_hemorrhage,
     )
 
 
@@ -148,6 +162,13 @@ def predict_risk(
     body_temperature: float,
     spo2: int,
     blood_sugar: float,
+    hypertension: bool = False,
+    diabetes: bool = False,
+    anemia: bool = False,
+    heart_disease: bool = False,
+    multiple_pregnancy: bool = False,
+    previous_preeclampsia: bool = False,
+    previous_hemorrhage: bool = False,
     engine: Optional[RiskEngine] = None,
 ) -> AssessmentResult:
     """Assess obstetric emergency risk from explicit patient parameters."""
@@ -178,5 +199,12 @@ def predict_risk(
         body_temperature=body_temperature,
         spo2=spo2,
         blood_sugar=blood_sugar,
+        hypertension=hypertension,
+        diabetes=diabetes,
+        anemia=anemia,
+        heart_disease=heart_disease,
+        multiple_pregnancy=multiple_pregnancy,
+        previous_preeclampsia=previous_preeclampsia,
+        previous_hemorrhage=previous_hemorrhage,
     )
     return predict_from_patient(patient, engine=engine)

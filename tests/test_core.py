@@ -46,6 +46,13 @@ VALID_FORM_DATA = {
     "body_temperature": "36.8",
     "spo2": "98",
     "blood_sugar": "95",
+    "hypertension": "false",
+    "diabetes": "false",
+    "anemia": "false",
+    "heart_disease": "false",
+    "multiple_pregnancy": "false",
+    "previous_preeclampsia": "false",
+    "previous_hemorrhage": "false",
 }
 
 
@@ -78,6 +85,13 @@ def make_patient(**overrides) -> PatientInfo:
         "body_temperature": 36.8,
         "spo2": 98,
         "blood_sugar": 95.0,
+        "hypertension": False,
+        "diabetes": False,
+        "anemia": False,
+        "heart_disease": False,
+        "multiple_pregnancy": False,
+        "previous_preeclampsia": False,
+        "previous_hemorrhage": False,
     }
     defaults.update(overrides)
     return PatientInfo(**defaults)
@@ -95,6 +109,8 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(patient.bleeding_severity, "None")
         self.assertEqual(patient.pain_score, 0)
         self.assertFalse(patient.loss_of_consciousness)
+        self.assertFalse(patient.hypertension)
+        self.assertFalse(patient.previous_hemorrhage)
 
     def test_parse_accepts_boolean_and_numeric_api_payloads(self) -> None:
         """JSON API payloads should accept native booleans and numeric types."""
@@ -126,6 +142,13 @@ class ValidationTests(unittest.TestCase):
                 "body_temperature": 38.1,
                 "spo2": 93,
                 "blood_sugar": 145,
+                "hypertension": True,
+                "diabetes": True,
+                "anemia": False,
+                "heart_disease": False,
+                "multiple_pregnancy": True,
+                "previous_preeclampsia": True,
+                "previous_hemorrhage": False,
             }
         )
 
@@ -134,6 +157,10 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual(patient.pain_score, 7)
         self.assertTrue(patient.headache)
         self.assertEqual(patient.fetal_movement, "Reduced")
+        self.assertTrue(patient.hypertension)
+        self.assertTrue(patient.diabetes)
+        self.assertTrue(patient.multiple_pregnancy)
+        self.assertTrue(patient.previous_preeclampsia)
 
     def test_missing_required_field_raises_meaningful_error(self) -> None:
         """Missing fields should raise a dedicated exception with a clear message."""
@@ -298,6 +325,32 @@ class RiskEngineTests(unittest.TestCase):
         self.assertGreaterEqual(result.risk_score, 9)
         self.assertIn("immediate", result.recommended_action.lower())
 
+    def test_clinical_history_risk_factors_increase_risk(self) -> None:
+        """Comorbidity and obstetric history checklist factors should affect classification."""
+        patient = make_patient(
+            hypertension=True,
+            diabetes=True,
+            anemia=True,
+            heart_disease=True,
+            multiple_pregnancy=True,
+            previous_preeclampsia=True,
+            previous_hemorrhage=True,
+            systolic_bp=145,
+            diastolic_bp=92,
+            blood_sugar=190.0,
+            chest_pain=True,
+            difficulty_breathing=True,
+        )
+
+        result = RuleBasedRiskEngine().assess_risk(patient)
+        summary = patient.to_summary_dict()
+
+        self.assertIn(result.risk_level, {"High Risk", "Critical Risk"})
+        self.assertGreaterEqual(result.risk_score, 9)
+        self.assertIn("Known hypertension", result.clinical_explanation)
+        self.assertEqual(summary["Hypertension"], "Yes")
+        self.assertEqual(summary["Previous Hemorrhage"], "Yes")
+
     def test_validation_rejects_invalid_patient(self) -> None:
         """Invalid data should be rejected by the validator."""
         patient = make_patient(age=0)
@@ -342,6 +395,13 @@ class RiskEngineTests(unittest.TestCase):
             body_temperature=38.1,
             spo2=93,
             blood_sugar=145.0,
+            hypertension=True,
+            diabetes=True,
+            anemia=True,
+            heart_disease=True,
+            multiple_pregnancy=True,
+            previous_preeclampsia=True,
+            previous_hemorrhage=True,
             fetal_movement="Reduced",
             headache=True,
             blurred_vision=True,

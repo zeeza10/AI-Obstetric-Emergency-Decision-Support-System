@@ -65,6 +65,13 @@ FIELD_LABELS = {
     "respiratory_rate": "Respiratory Rate",
     "spo2": "SpO₂",
     "blood_sugar": "Blood Sugar",
+    "hypertension": "Hypertension",
+    "diabetes": "Diabetes",
+    "anemia": "Anemia",
+    "heart_disease": "Heart Disease",
+    "multiple_pregnancy": "Multiple Pregnancy",
+    "previous_preeclampsia": "Previous Preeclampsia",
+    "previous_hemorrhage": "Previous Hemorrhage",
 }
 
 
@@ -438,6 +445,22 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         BLOOD_SUGAR_MIN,
         BLOOD_SUGAR_MAX,
     )
+    hypertension = _parse_required_yes_no(_require_raw_value(form_data, "hypertension"), "hypertension")
+    diabetes = _parse_required_yes_no(_require_raw_value(form_data, "diabetes"), "diabetes")
+    anemia = _parse_required_yes_no(_require_raw_value(form_data, "anemia"), "anemia")
+    heart_disease = _parse_required_yes_no(_require_raw_value(form_data, "heart_disease"), "heart_disease")
+    multiple_pregnancy = _parse_required_yes_no(
+        _require_raw_value(form_data, "multiple_pregnancy"),
+        "multiple_pregnancy",
+    )
+    previous_preeclampsia = _parse_required_yes_no(
+        _require_raw_value(form_data, "previous_preeclampsia"),
+        "previous_preeclampsia",
+    )
+    previous_hemorrhage = _parse_required_yes_no(
+        _require_raw_value(form_data, "previous_hemorrhage"),
+        "previous_hemorrhage",
+    )
 
     patient = PatientInfo(
         age=age,
@@ -466,6 +489,13 @@ def parse_patient_from_form_data(form_data: Mapping[str, object]) -> PatientInfo
         body_temperature=body_temperature,
         spo2=spo2,
         blood_sugar=blood_sugar,
+        hypertension=hypertension,
+        diabetes=diabetes,
+        anemia=anemia,
+        heart_disease=heart_disease,
+        multiple_pregnancy=multiple_pregnancy,
+        previous_preeclampsia=previous_preeclampsia,
+        previous_hemorrhage=previous_hemorrhage,
     )
     validate_patient_information(patient)
     return patient
@@ -533,6 +563,13 @@ def validate_patient_information(patient: PatientInfo) -> None:
         "difficulty_breathing",
         "chest_pain",
         "vomiting",
+        "hypertension",
+        "diabetes",
+        "anemia",
+        "heart_disease",
+        "multiple_pregnancy",
+        "previous_preeclampsia",
+        "previous_hemorrhage",
     ):
         value = getattr(patient, field_name)
         if not isinstance(value, bool):
